@@ -1,0 +1,27 @@
+name: Publish WordPress Plugin
+
+on:
+  push:
+    tags:
+      - 'wordpress-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check browser bridge syntax
+        run: node --check wordpress/assets/ccf-tracking.js
+      - name: Check PHP syntax
+        run: php -l wordpress/ccf-google-ads-site-connector.php && php -l wordpress/includes/class-ccf-sites-control.php
+      - name: Run connector tests
+        run: node --test tests/wordpress-bridge.test.mjs && php tests/wordpress-token-crypto.php && php tests/wordpress-control.php && php tests/wordpress-updater.php
+      - name: Build and verify ZIP
+        run: sh scripts/package-wordpress.sh
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/ccf-sites-ads-connector.zip --generate-notes --verify-tag --title "CCF Sites & Ads Connector ${GITHUB_REF_NAME#wordpress-v}"
