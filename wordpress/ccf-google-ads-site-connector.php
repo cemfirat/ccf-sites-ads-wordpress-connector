@@ -24,6 +24,8 @@ require_once __DIR__ . '/includes/class-ccf-sites-content-admin.php';
 CCF_Sites_Content_Admin::init();
 require_once __DIR__ . '/includes/class-ccf-sites-draft-seo.php';
 CCF_Sites_Draft_SEO::init();
+require_once __DIR__ . '/includes/class-ccf-sites-status-overlay.php';
+CCF_Sites_Status_Overlay::init();
 
 final class CCF_Sites_Ads_Plugin_Updater {
     private const REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
@@ -36,13 +38,9 @@ final class CCF_Sites_Ads_Plugin_Updater {
     }
 
     public static function check($transient) {
-        if (!is_object($transient) || !isset($transient->checked) || !is_array($transient->checked)) {
-            return $transient;
-        }
+        if (!is_object($transient) || !isset($transient->checked) || !is_array($transient->checked)) return $transient;
         $plugin = plugin_basename(CCF_SITES_ADS_PLUGIN_FILE);
-        if (!array_key_exists($plugin, $transient->checked)) {
-            return $transient;
-        }
+        if (!array_key_exists($plugin, $transient->checked)) return $transient;
         $release = self::latest_release();
         if ($release === null || version_compare(CCF_SITES_ADS_PLUGIN_VERSION, $release['version'], '>=')) {
             unset($transient->response[$plugin]);
@@ -62,13 +60,9 @@ final class CCF_Sites_Ads_Plugin_Updater {
     }
 
     public static function information($result, $action, $args) {
-        if ($action !== 'plugin_information' || !is_object($args) || ($args->slug ?? '') !== 'ccf-google-ads-site-connector') {
-            return $result;
-        }
+        if ($action !== 'plugin_information' || !is_object($args) || ($args->slug ?? '') !== 'ccf-google-ads-site-connector') return $result;
         $release = self::latest_release();
-        if ($release === null) {
-            return $result;
-        }
+        if ($release === null) return $result;
         return (object) [
             'name' => 'CCF Sites & Ads Connector',
             'slug' => 'ccf-google-ads-site-connector',
