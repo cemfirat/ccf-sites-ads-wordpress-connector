@@ -17,6 +17,7 @@ cp "$ROOT_DIR/wordpress/assets/ccf-tracking.js" "$PLUGIN_DIR/assets/"
 cp "$ROOT_DIR/wordpress/includes/class-ccf-sites-control.php" "$PLUGIN_DIR/includes/"
 cp "$ROOT_DIR/wordpress/includes/class-ccf-sites-content-admin.php" "$PLUGIN_DIR/includes/"
 cp "$ROOT_DIR/wordpress/includes/class-ccf-sites-draft-seo.php" "$PLUGIN_DIR/includes/"
+cp "$ROOT_DIR/wordpress/includes/class-ccf-sites-status-overlay.php" "$PLUGIN_DIR/includes/"
 
 cd "$BUILD_DIR"
 zip -qr "$ZIP_PATH" ccf-google-ads-site-connector
