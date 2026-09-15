@@ -36,7 +36,7 @@ class WP_REST_Response {
         $this->status = $status;
     }
 }
-class Test_Request {
+class Test_Request implements ArrayAccess {
     private $body;
     private $params;
     private $query;
@@ -47,9 +47,11 @@ class Test_Request {
     }
     public function get_json_params() { return json_decode($this->body, true); }
     public function get_param($name) { return $this->query[$name] ?? null; }
-    public function offsetGet($name) { return $this->params[$name] ?? null; }
-    public function __get($name) { return $this->params[$name] ?? null; }
     public function get_query_params() { return $this->query; }
+    public function offsetExists($offset): bool { return array_key_exists($offset, $this->params); }
+    public function offsetGet($offset) { return $this->params[$offset] ?? null; }
+    public function offsetSet($offset, $value): void { $this->params[$offset] = $value; }
+    public function offsetUnset($offset): void { unset($this->params[$offset]); }
 }
 
 class CCF_Sites_Control {
