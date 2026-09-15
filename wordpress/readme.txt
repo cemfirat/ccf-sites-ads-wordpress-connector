@@ -1,17 +1,22 @@
 === CCF Sites & Ads Connector ===
 Contributors: cemfirat
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: Proprietary / private project
 
-Secure WordPress control and conversion connector for CCF Sites & Ads.
+Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
 
 == Description ==
 
-This private plugin connects an approved WordPress website to CCF Sites & Ads without exposing Google Ads credentials or the server-side site token to browser JavaScript.
+CCF Sites & Ads Connector is the universal WordPress-side connector for websites managed through CCF Sites & Ads. The same plugin can be installed on different customer websites; customer separation and Google provider credentials remain in the central CCF platform.
 
-It supports authenticated inventory/content reads and controlled WordPress,
-Rank Math and YOOtheme changes with preview, approval binding, verification and rollback.
+It supports authenticated inventory/content reads and controlled WordPress, Rank Math and YOOtheme changes with preview, approval binding, verification and rollback.
+
+Version 1.2 adds a draft-first content administration surface for preparing new content without bypassing the approval boundary for published content. It can create public post types as draft, pending or private, manage public taxonomies, read and update ACF data on unpublished content, work with image media and set featured images.
+
+Direct publication is intentionally not available through the draft-first surface. Existing published content continues to use the preview/approval/apply workflow.
+
+Google Ads, GA4 and Search Console credentials are never stored in this WordPress plugin. Those provider connections are managed centrally by CCF Sites & Ads.
 
 Tracking is disabled until advertising consent is explicitly provided by the website consent integration.
 
@@ -21,12 +26,14 @@ Raw form contents, names, email addresses, phone numbers, message bodies and upl
 
 == Installation ==
 
-1. Install the generated ccf-sites-ads-connector.zip package.
+1. Install the generated ccf-sites-ads-connector.zip package on the customer WordPress website.
 2. Configure the plugin under Settings > CCF Sites & Ads or supply the documented server-side constants.
 3. Activate CCF Sites & Ads Connector.
-4. Configure unique client/site/environment values for the customer.
+4. Pair the site with the corresponding customer workspace in CCF Sites & Ads.
 5. Verify the YOOtheme consent mapping or connect another consent manager to window.CCFGoogleAds.setConsent().
 6. Mark only approved forms for form-submit tracking.
+
+The same plugin package is used for every customer website. Google Ads, GA4 and Search Console are selected centrally in the customer's CCF workspace and do not require additional WordPress plugins.
 
 See README.md in the project repository for the complete configuration and production checklist.
 
@@ -38,7 +45,19 @@ The plugin intentionally minimizes the event payload. Page and referrer URLs hav
 
 The site token is server-side only. Browser requests use a short-lived same-origin bootstrap signature before WordPress forwards an event to the control service. Production control endpoints must use HTTPS.
 
+Content-administration calls use the same signed server-to-server control boundary. Media import is limited to public HTTPS image sources and blocks private/reserved destinations, unsupported MIME types and files larger than 10 MB. Published content cannot be modified or trashed through the direct draft-first endpoints.
+
 == Changelog ==
+
+= 1.2.0 =
+* Added draft-first creation of public WordPress post types.
+* Added public taxonomy and term discovery, creation and assignment.
+* Added ACF field discovery and updates on unpublished content.
+* Added image-library search, protected HTTPS image import and featured-image assignment.
+* Added safe trashing of unpublished content.
+* Added idempotency for draft and media creation.
+* Preserved the existing preview, approval, verification and rollback boundary for published content.
+* Consolidated the plugin entrypoint for future universal CCF Sites & Ads releases.
 
 = 1.1.1 =
 * Use the public CCF Sites & Ads WordPress release channel for direct downloads and automatic updates.
