@@ -13,14 +13,8 @@ defined('ABSPATH') || exit;
 define('CCF_SITES_ADS_PLUGIN_VERSION', '1.2.0');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
-/*
- * The established tracking/settings runtime is kept intact while the plugin
- * entrypoint is now small and versioned independently. The runtime file is an
- * .inc file so WordPress never exposes it as a second plugin.
- */
 require_once __DIR__ . '/ccf-site-connector-runtime.inc';
 
-/* The legacy runtime registered its updater against its old file path. */
 if (function_exists('remove_filter')) {
     remove_filter('pre_set_site_transient_update_plugins', [CCF_Google_Ads_Site_Connector::class, 'check_for_update']);
     remove_filter('plugins_api', [CCF_Google_Ads_Site_Connector::class, 'plugin_information'], 20);
@@ -28,6 +22,8 @@ if (function_exists('remove_filter')) {
 
 require_once __DIR__ . '/includes/class-ccf-sites-content-admin.php';
 CCF_Sites_Content_Admin::init();
+require_once __DIR__ . '/includes/class-ccf-sites-draft-seo.php';
+CCF_Sites_Draft_SEO::init();
 
 final class CCF_Sites_Ads_Plugin_Updater {
     private const REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
@@ -92,9 +88,7 @@ final class CCF_Sites_Ads_Plugin_Updater {
 
     private static function latest_release(): ?array {
         $cached = get_transient(self::CACHE_KEY);
-        if (is_array($cached)) {
-            return $cached;
-        }
+        if (is_array($cached)) return $cached;
         $response = wp_remote_get(
             'https://api.github.com/repos/' . self::REPOSITORY . '/releases/latest',
             [
@@ -107,45 +101,31 @@ final class CCF_Sites_Ads_Plugin_Updater {
                 ],
             ]
         );
-        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-            return null;
-        }
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) return null;
         $payload = json_decode(wp_remote_retrieve_body($response), true);
-        if (!is_array($payload) || !empty($payload['draft']) || !empty($payload['prerelease'])) {
-            return null;
-        }
+        if (!is_array($payload) || !empty($payload['draft']) || !empty($payload['prerelease'])) return null;
         $tag = isset($payload['tag_name']) ? (string) $payload['tag_name'] : '';
         $version = preg_replace('/^(?:wordpress-)?v/i', '', $tag);
-        if (!is_string($version) || !preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/', $version)) {
-            return null;
-        }
+        if (!is_string($version) || !preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/', $version)) return null;
         $release_url = isset($payload['html_url']) ? esc_url_raw((string) $payload['html_url']) : '';
         $release_prefix = 'https://github.com/' . self::REPOSITORY . '/releases/';
-        if ($release_url === '' || strpos($release_url, $release_prefix) !== 0) {
-            return null;
-        }
+        if ($release_url === '' || strpos($release_url, $release_prefix) !== 0) return null;
         $package = '';
         foreach (($payload['assets'] ?? []) as $asset) {
-            if (!is_array($asset) || ($asset['name'] ?? '') !== self::ASSET) {
-                continue;
-            }
+            if (!is_array($asset) || ($asset['name'] ?? '') !== self::ASSET) continue;
             $candidate = esc_url_raw((string) ($asset['browser_download_url'] ?? ''));
             if (strpos($candidate, $release_prefix . 'download/') === 0 && substr($candidate, -strlen('/' . self::ASSET)) === '/' . self::ASSET) {
                 $package = $candidate;
                 break;
             }
         }
-        if ($package === '') {
-            return null;
-        }
+        if ($package === '') return null;
         $release = [
             'version' => $version,
             'url' => $release_url,
             'package' => $package,
             'tested' => '6.9',
-            'notes' => isset($payload['body']) && is_string($payload['body'])
-                ? substr($payload['body'], 0, 8000)
-                : 'Aktualisierung des CCF Sites & Ads Connectors.',
+            'notes' => isset($payload['body']) && is_string($payload['body']) ? substr($payload['body'], 0, 8000) : 'Aktualisierung des CCF Sites & Ads Connectors.',
         ];
         set_transient(self::CACHE_KEY, $release, 6 * 60 * 60);
         return $release;
