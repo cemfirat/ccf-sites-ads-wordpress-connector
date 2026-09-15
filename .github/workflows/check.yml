@@ -17,7 +17,7 @@ jobs:
       - name: Check browser bridge syntax
         run: node --check wordpress/assets/ccf-tracking.js
       - name: Check PHP syntax
-        run: php -l wordpress/ccf-google-ads-site-connector.php && php -l wordpress/ccf-site-connector-runtime.inc && php -l wordpress/includes/class-ccf-sites-control.php && php -l wordpress/includes/class-ccf-sites-content-admin.php
+        run: php -l wordpress/ccf-google-ads-site-connector.php && php -l wordpress/ccf-site-connector-runtime.inc && php -l wordpress/includes/class-ccf-sites-control.php && php -l wordpress/includes/class-ccf-sites-content-admin.php && php -l wordpress/includes/class-ccf-sites-draft-seo.php
       - name: Run connector tests
         run: node --test tests/wordpress-bridge.test.mjs && php tests/wordpress-token-crypto.php && php tests/wordpress-control.php && php tests/wordpress-content-admin.php && php tests/wordpress-updater.php
       - name: Build and verify ZIP
