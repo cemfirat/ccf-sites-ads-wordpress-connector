@@ -10,6 +10,7 @@ rm -rf "$BUILD_DIR" "$ZIP_PATH"
 mkdir -p "$PLUGIN_DIR/assets" "$PLUGIN_DIR/includes"
 
 cp "$ROOT_DIR/wordpress/ccf-google-ads-site-connector.php" "$PLUGIN_DIR/"
+cp "$ROOT_DIR/wordpress/ccf-site-connector-runtime.inc" "$PLUGIN_DIR/"
 cp "$ROOT_DIR/wordpress/readme.txt" "$PLUGIN_DIR/"
 cp "$ROOT_DIR/wordpress/README.md" "$PLUGIN_DIR/README.md"
 cp "$ROOT_DIR/wordpress/assets/ccf-tracking.js" "$PLUGIN_DIR/assets/"
