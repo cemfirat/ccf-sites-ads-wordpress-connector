@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CCF Sites & Ads Connector
  * Description: Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Cem Firat
  * Requires PHP: 7.4
  * Update URI: https://github.com/cemfirat/ccf-sites-ads-wordpress-connector
@@ -10,7 +10,7 @@
 
 defined('ABSPATH') || exit;
 
-define('CCF_SITES_ADS_PLUGIN_VERSION', '1.2.0');
+define('CCF_SITES_ADS_PLUGIN_VERSION', '1.2.1');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/ccf-site-connector-runtime.inc';
@@ -30,11 +30,32 @@ CCF_Sites_Status_Overlay::init();
 final class CCF_Sites_Ads_Plugin_Updater {
     private const REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
     private const ASSET = 'ccf-sites-ads-connector.zip';
-    private const CACHE_KEY = 'ccf_sites_ads_github_release_v2';
+    private const CACHE_KEY = 'ccf_sites_ads_github_release_v3';
 
     public static function init(): void {
+        add_filter('update_plugins_github.com', [self::class, 'host_update'], 10, 4);
         add_filter('pre_set_site_transient_update_plugins', [self::class, 'check']);
         add_filter('plugins_api', [self::class, 'information'], 20, 3);
+    }
+
+    public static function host_update($update, $plugin_data, $plugin_file, $locales) {
+        if (($plugin_data['UpdateURI'] ?? '') !== 'https://github.com/' . self::REPOSITORY) {
+            return $update;
+        }
+        $release = self::latest_release();
+        if ($release === null || version_compare(CCF_SITES_ADS_PLUGIN_VERSION, $release['version'], '>=')) {
+            return false;
+        }
+        return [
+            'id' => 'https://github.com/' . self::REPOSITORY,
+            'slug' => 'ccf-google-ads-site-connector',
+            'version' => $release['version'],
+            'url' => $release['url'],
+            'package' => $release['package'],
+            'tested' => $release['tested'],
+            'requires_php' => '7.4',
+            'autoupdate' => false,
+        ];
     }
 
     public static function check($transient) {

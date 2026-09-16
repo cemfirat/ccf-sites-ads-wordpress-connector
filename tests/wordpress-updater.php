@@ -34,7 +34,7 @@ function wp_remote_get(string $url, array $options): array {
     if ($url !== 'https://api.github.com/repos/cemfirat/ccf-sites-ads-wordpress-connector/releases/latest') {
         throw new RuntimeException('Unexpected release API URL.');
     }
-    if (($options['headers']['User-Agent'] ?? '') !== 'CCF-Sites-Ads-WordPress-Updater/1.2.0') {
+    if (($options['headers']['User-Agent'] ?? '') !== 'CCF-Sites-Ads-WordPress-Updater/1.2.1') {
         throw new RuntimeException('Updater user agent is missing or stale.');
     }
     return [
@@ -56,21 +56,39 @@ function wp_remote_get(string $url, array $options): array {
 
 require __DIR__ . '/../wordpress/ccf-google-ads-site-connector.php';
 
-if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.2.0') {
-    throw new RuntimeException('Plugin version constant is not v1.2.0.');
+if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.2.1') {
+    throw new RuntimeException('Plugin version constant is not v1.2.1.');
+}
+
+$nativeFilters = $GLOBALS['ccf_filters']['update_plugins_github.com'] ?? [];
+if (count($nativeFilters) !== 1 || $nativeFilters[0][2] !== 4) {
+    throw new RuntimeException('Native Update URI hook is not registered correctly.');
+}
+
+$native = CCF_Sites_Ads_Plugin_Updater::host_update(
+    false,
+    ['UpdateURI' => 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector'],
+    'ccf-google-ads-site-connector/ccf-google-ads-site-connector.php',
+    ['de_DE']
+);
+if (!is_array($native) || ($native['version'] ?? '') !== '1.3.0') {
+    throw new RuntimeException('Native Update URI hook did not return the newer stable release.');
+}
+if (($native['package'] ?? '') !== 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector/releases/download/wordpress-v1.3.0/ccf-sites-ads-connector.zip') {
+    throw new RuntimeException('Native Update URI hook accepted an unexpected package URL.');
 }
 
 $transient = (object) [
-    'checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.2.0'],
+    'checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.2.1'],
     'response' => [],
 ];
 $updated = CCF_Sites_Ads_Plugin_Updater::check($transient);
 $offer = $updated->response['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php'] ?? null;
 if (!is_object($offer) || $offer->new_version !== '1.3.0') {
-    throw new RuntimeException('A newer stable release was not offered.');
+    throw new RuntimeException('A newer stable release was not offered through the compatibility path.');
 }
 if ($offer->package !== 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector/releases/download/wordpress-v1.3.0/ccf-sites-ads-connector.zip') {
     throw new RuntimeException('Updater accepted an unexpected package URL.');
 }
 
-echo "WordPress GitHub updater discovery passed.\n";
+echo "WordPress native GitHub updater discovery passed.\n";
