@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CCF Sites & Ads Connector
  * Description: Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: Cem Firat
  * Requires PHP: 7.4
  * Update URI: https://github.com/cemfirat/ccf-sites-ads-wordpress-connector
@@ -10,7 +10,7 @@
 
 defined('ABSPATH') || exit;
 
-define('CCF_SITES_ADS_PLUGIN_VERSION', '1.2.1');
+define('CCF_SITES_ADS_PLUGIN_VERSION', '1.2.2');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/ccf-site-connector-runtime.inc';
@@ -30,7 +30,8 @@ CCF_Sites_Status_Overlay::init();
 final class CCF_Sites_Ads_Plugin_Updater {
     private const REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
     private const ASSET = 'ccf-sites-ads-connector.zip';
-    private const CACHE_KEY = 'ccf_sites_ads_github_release_v3';
+    private const CACHE_KEY = 'ccf_sites_ads_github_release_v4';
+    private const CACHE_TTL = 60 * 60;
 
     public static function init(): void {
         add_filter('update_plugins_github.com', [self::class, 'host_update'], 10, 4);
@@ -43,19 +44,10 @@ final class CCF_Sites_Ads_Plugin_Updater {
             return $update;
         }
         $release = self::latest_release();
-        if ($release === null || version_compare(CCF_SITES_ADS_PLUGIN_VERSION, $release['version'], '>=')) {
-            return false;
+        if ($release === null) {
+            return $update;
         }
-        return [
-            'id' => 'https://github.com/' . self::REPOSITORY,
-            'slug' => 'ccf-google-ads-site-connector',
-            'version' => $release['version'],
-            'url' => $release['url'],
-            'package' => $release['package'],
-            'tested' => $release['tested'],
-            'requires_php' => '7.4',
-            'autoupdate' => false,
-        ];
+        return self::update_payload($release);
     }
 
     public static function check($transient) {
@@ -63,20 +55,23 @@ final class CCF_Sites_Ads_Plugin_Updater {
         $plugin = plugin_basename(CCF_SITES_ADS_PLUGIN_FILE);
         if (!array_key_exists($plugin, $transient->checked)) return $transient;
         $release = self::latest_release();
-        if ($release === null || version_compare(CCF_SITES_ADS_PLUGIN_VERSION, $release['version'], '>=')) {
-            unset($transient->response[$plugin]);
-            return $transient;
+        if ($release === null) return $transient;
+
+        if (!isset($transient->response) || !is_array($transient->response)) {
+            $transient->response = [];
         }
-        $transient->response[$plugin] = (object) [
-            'id' => 'https://github.com/' . self::REPOSITORY,
-            'slug' => 'ccf-google-ads-site-connector',
-            'plugin' => $plugin,
-            'new_version' => $release['version'],
-            'url' => $release['url'],
-            'package' => $release['package'],
-            'tested' => $release['tested'],
-            'requires_php' => '7.4',
-        ];
+        if (!isset($transient->no_update) || !is_array($transient->no_update)) {
+            $transient->no_update = [];
+        }
+
+        $payload = (object) (self::update_payload($release) + ['plugin' => $plugin]);
+        if (version_compare(CCF_SITES_ADS_PLUGIN_VERSION, $release['version'], '<')) {
+            unset($transient->no_update[$plugin]);
+            $transient->response[$plugin] = $payload;
+        } else {
+            unset($transient->response[$plugin]);
+            $transient->no_update[$plugin] = $payload;
+        }
         return $transient;
     }
 
@@ -98,6 +93,19 @@ final class CCF_Sites_Ads_Plugin_Updater {
                 'description' => 'Sicherer WordPress-, Rank-Math-, YOOtheme-, ACF-, Content- und Conversion-Connector für CCF Sites & Ads.',
                 'changelog' => nl2br(esc_html($release['notes'])),
             ],
+        ];
+    }
+
+    private static function update_payload(array $release): array {
+        return [
+            'id' => 'https://github.com/' . self::REPOSITORY,
+            'slug' => 'ccf-google-ads-site-connector',
+            'version' => $release['version'],
+            'new_version' => $release['version'],
+            'url' => $release['url'],
+            'package' => $release['package'],
+            'tested' => $release['tested'],
+            'requires_php' => '7.4',
         ];
     }
 
@@ -142,7 +150,7 @@ final class CCF_Sites_Ads_Plugin_Updater {
             'tested' => '6.9',
             'notes' => isset($payload['body']) && is_string($payload['body']) ? substr($payload['body'], 0, 8000) : 'Aktualisierung des CCF Sites & Ads Connectors.',
         ];
-        set_transient(self::CACHE_KEY, $release, 6 * 60 * 60);
+        set_transient(self::CACHE_KEY, $release, self::CACHE_TTL);
         return $release;
     }
 }
