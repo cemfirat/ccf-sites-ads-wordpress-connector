@@ -1,7 +1,7 @@
 === CCF Sites & Ads Connector ===
 Contributors: cemfirat
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: Proprietary / private project
 
 Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
@@ -48,6 +48,12 @@ The site token is server-side only. Browser requests use a short-lived same-orig
 Content-administration calls use the same signed server-to-server control boundary. Media import is limited to public HTTPS image sources and blocks private/reserved destinations, unsupported MIME types and files larger than 10 MB. Published content cannot be modified or trashed through the direct draft-first endpoints.
 
 == Changelog ==
+
+= 1.2.2 =
+* Preserve WordPress native update metadata even when the connector is already current, so the automatic-update toggle remains available.
+* Stop forcing an automatic-update preference; WordPress administrators control that setting normally.
+* Add current-version/no-update test coverage for the GitHub Update URI path.
+* Reduce release metadata cache duration from six hours to one hour.
 
 = 1.2.1 =
 * Added WordPress' native Update URI host hook for GitHub-hosted update discovery.
