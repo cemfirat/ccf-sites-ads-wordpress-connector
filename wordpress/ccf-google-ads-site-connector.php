@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CCF Sites & Ads Connector
  * Description: Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
- * Version: 1.3.3
+ * Version: 1.3.4
  * Author: Cem Firat
  * Requires PHP: 7.4
  * Update URI: https://github.com/cemfirat/ccf-sites-ads-wordpress-connector
@@ -10,7 +10,7 @@
 
 defined('ABSPATH') || exit;
 
-define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.3');
+define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.4');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/ccf-site-connector-runtime.inc';
@@ -32,13 +32,20 @@ CCF_Sites_Authors::init();
 final class CCF_Sites_Ads_Plugin_Updater {
     private const REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
     private const ASSET = 'ccf-sites-ads-connector.zip';
-    private const CACHE_KEY = 'ccf_sites_ads_github_release_v5';
-    private const CACHE_TTL = 60 * 60;
+    private const CACHE_KEY = 'ccf_sites_ads_github_release_v6';
+    private const CACHE_TTL = 5 * 60;
 
     public static function init(): void {
         add_filter('update_plugins_github.com', [self::class, 'host_update'], 10, 4);
         add_filter('pre_set_site_transient_update_plugins', [self::class, 'check']);
         add_filter('plugins_api', [self::class, 'information'], 20, 3);
+        add_action('load-update-core.php', [self::class, 'refresh_on_manual_check']);
+    }
+
+    public static function refresh_on_manual_check(): void {
+        if (isset($_GET['force-check']) && (string) $_GET['force-check'] === '1') {
+            delete_transient(self::CACHE_KEY);
+        }
     }
 
     public static function host_update($update, $plugin_data, $plugin_file, $locales) {
@@ -86,7 +93,7 @@ final class CCF_Sites_Ads_Plugin_Updater {
         if ($release_url==='' || strpos($release_url,$release_prefix)!==0) return null;
         $package=''; foreach (($payload['assets']??[]) as $asset) { if (!is_array($asset)||($asset['name']??'')!==self::ASSET) continue; $candidate=esc_url_raw((string)($asset['browser_download_url']??'')); if (strpos($candidate,$release_prefix.'download/')===0 && substr($candidate,-strlen('/'.self::ASSET))==='/'.self::ASSET){$package=$candidate;break;} }
         if ($package==='') return null;
-        $release=['version'=>$version,'url'=>$release_url,'package'=>$package,'tested'=>'6.9','notes'=>isset($payload['body'])&&is_string($payload['body'])?substr($payload['body'],0,8000):'Aktualisierung des CCF Sites & Ads Connectors.']; set_transient(self::CACHE_KEY,$release,self::CACHE_TTL); return $release;
+        $release=['version'=>$version,'url'=>$release_url,'package'=>$package,'tested'=>'7.1','notes'=>isset($payload['body'])&&is_string($payload['body'])?substr($payload['body'],0,8000):'Aktualisierung des CCF Sites & Ads Connectors.']; set_transient(self::CACHE_KEY,$release,self::CACHE_TTL); return $release;
     }
 }
 
