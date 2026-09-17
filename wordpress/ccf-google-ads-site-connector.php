@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CCF Sites & Ads Connector
  * Description: Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
- * Version: 1.3.1
+ * Version: 1.3.2
  * Author: Cem Firat
  * Requires PHP: 7.4
  * Update URI: https://github.com/cemfirat/ccf-sites-ads-wordpress-connector
@@ -10,7 +10,7 @@
 
 defined('ABSPATH') || exit;
 
-define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.1');
+define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.2');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/ccf-site-connector-runtime.inc';
@@ -32,7 +32,7 @@ CCF_Sites_Authors::init();
 final class CCF_Sites_Ads_Plugin_Updater {
     private const REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
     private const ASSET = 'ccf-sites-ads-connector.zip';
-    private const CACHE_KEY = 'ccf_sites_ads_github_release_v4';
+    private const CACHE_KEY = 'ccf_sites_ads_github_release_v5';
     private const CACHE_TTL = 60 * 60;
 
     public static function init(): void {
