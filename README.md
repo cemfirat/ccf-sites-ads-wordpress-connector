@@ -47,6 +47,8 @@ Bitte keine Tokens oder andere Zugangsdaten in Issues veröffentlichen. Sicherhe
 
 `main` ist der geschützte Release-Branch. Änderungen werden über kurzlebige Arbeitsbranches und Pull Requests eingebracht. Der GitHub-Actions-Check `check` muss erfolgreich sein, bevor nach `main` gemergt wird. Force-Pushes und das Löschen von `main` sind deaktiviert; gemergte Arbeitsbranches werden anschließend entfernt.
 
+Nach einem erfolgreichen Merge nach `main` prüft der Release-Workflow erneut Syntax, Tests und Plugin-ZIP. Wenn für die im Plugin-Header deklarierte Version noch kein `wordpress-v<Version>`-Tag existiert, werden Tag und GitHub-Release automatisch erzeugt. Dadurch bleibt der WordPress-Updatekanal ohne manuellen Release-Schritt aktuell.
+
 Der geschützte Merge-Workflow wurde am 17.09.2026 mit einem echten Pull Request und dem verpflichtenden `check` verifiziert.
 
 Copyright © Cem Firat. Alle Rechte vorbehalten.
