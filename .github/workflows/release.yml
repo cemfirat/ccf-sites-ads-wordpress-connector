@@ -2,8 +2,8 @@ name: Publish WordPress Plugin
 
 on:
   push:
-    tags:
-      - 'wordpress-v*'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - name: Check browser bridge syntax
         run: node --check wordpress/assets/ccf-tracking.js
       - name: Check PHP syntax
@@ -21,7 +23,37 @@ jobs:
         run: node --test tests/wordpress-bridge.test.mjs && php tests/wordpress-token-crypto.php && php tests/wordpress-control.php && php tests/wordpress-content-admin.php && php tests/wordpress-updater.php
       - name: Build and verify ZIP
         run: sh scripts/package-wordpress.sh
+      - name: Resolve release version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/^ \* Version: \([0-9][0-9.]*\).*$/\1/p' wordpress/ccf-google-ads-site-connector.php | head -n 1)"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid plugin version: $VERSION" >&2
+            exit 1
+          fi
+          TAG="wordpress-v$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create version tag
+        if: steps.version.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "$TAG"
       - name: Publish GitHub release
+        if: steps.version.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/ccf-sites-ads-connector.zip --generate-notes --verify-tag --title "CCF Sites & Ads Connector ${GITHUB_REF_NAME#wordpress-v}"
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: gh release create "$TAG" dist/ccf-sites-ads-connector.zip --generate-notes --verify-tag --title "CCF Sites & Ads Connector $VERSION"
