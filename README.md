@@ -34,4 +34,8 @@ Die WordPress-Steuerung verwendet signierte Server-zu-Server-Anfragen. Der Websi
 
 Bitte keine Tokens oder andere Zugangsdaten in Issues veröffentlichen. Sicherheitsmeldungen gehören an die im [Sicherheitshinweis](SECURITY.md) genannte Kontaktadresse.
 
+## Entwicklungs- und Release-Workflow
+
+`main` ist der geschützte Release-Branch. Änderungen werden über kurzlebige Arbeitsbranches und Pull Requests eingebracht. Der GitHub-Actions-Check `check` muss erfolgreich sein, bevor nach `main` gemergt wird. Force-Pushes und das Löschen von `main` sind deaktiviert; gemergte Arbeitsbranches werden anschließend entfernt.
+
 Copyright © Cem Firat. Alle Rechte vorbehalten.
