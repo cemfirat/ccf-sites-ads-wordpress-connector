@@ -10,6 +10,9 @@ Der gleiche Connector wird auf jeder verwalteten WordPress-Website installiert. 
 - Seiten, Beiträge und öffentliche Post-Types lesen
 - bestehende Inhalte, Rank Math und YOOtheme über Preview/Freigabe/Verifikation/Rollback ändern
 - neue Inhalte draft-first als `draft`, `pending` oder `private` anlegen
+- freigegebene Beiträge nativ über WordPress mit `future`, `post_date` und `post_date_gmt` terminieren
+- Beitragsautor über eine existierende WordPress-Benutzer-ID setzen; Benutzer ohne `edit_posts` werden abgelehnt
+- geplante Beiträge samt Datum und Autor im zentralen Content-Inventar lesen
 - öffentliche Taxonomien, Kategorien, Schlagwörter und Begriffe verwalten
 - ACF-Felder auf unveröffentlichten Inhalten lesen und aktualisieren
 - Bildmedien lesen und aus geschützten öffentlichen HTTPS-Quellen importieren
@@ -17,7 +20,13 @@ Der gleiche Connector wird auf jeder verwalteten WordPress-Website installiert. 
 - unveröffentlichte Inhalte sicher in den Papierkorb verschieben
 - consent-basiertes Conversion-Tracking für freigegebene Telefon-, E-Mail-, WhatsApp- und Formularsignale
 
-Direktes Publizieren oder das unkontrollierte Verändern veröffentlichter Inhalte ist bewusst nicht Teil der Draft-First-Schnittstelle. Veröffentlichte Änderungen bleiben im zentralen CCF-Freigabepfad.
+Direktes unkontrolliertes Publizieren oder Verändern veröffentlichter Inhalte ist bewusst nicht Teil der Draft-First-Schnittstelle. Veröffentlichungen, Terminierungen und Änderungen an bereits veröffentlichten Inhalten bleiben im zentralen CCF-Freigabepfad. Eine geplante Veröffentlichung wird nach der Freigabe als native WordPress-Terminierung gespeichert; dafür ist keine externe ChatGPT- oder Slack-Automation nötig.
+
+## Autoren und SEO
+
+Für Blogbeiträge sollte der sichtbare WordPress-Autor einer echten redaktionell verantwortlichen Person oder einer klar bezeichneten Redaktion entsprechen. Technische Konten wie `ambra-ai` oder `developez` sollten nicht als öffentliche Autoren verwendet werden, wenn sie keine tatsächlichen Verfasser sind.
+
+Rank Math übernimmt für Article-/BlogPosting-Schema standardmäßig den primären WordPress-Autor. Deshalb sollte der Autorenname konsistent, glaubwürdig und – sofern Autor-Archive verwendet werden – über eine eindeutige Profilseite identifizierbar sein. Der Publisher bleibt davon getrennt die Organisation/Website.
 
 ## Installation
 

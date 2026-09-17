@@ -74,36 +74,16 @@ final class CCF_Sites_Control {
     }
 
     public static function register_routes(): void {
-        $read = [
-            'methods' => 'GET',
-            'permission_callback' => [self::class, 'authorize'],
-        ];
-        $write = [
-            'methods' => 'POST',
-            'permission_callback' => [self::class, 'authorize'],
-        ];
+        $read = ['methods' => 'GET', 'permission_callback' => [self::class, 'authorize']];
+        $write = ['methods' => 'POST', 'permission_callback' => [self::class, 'authorize']];
 
-        register_rest_route(self::REST_NAMESPACE, '/status', $read + [
-            'callback' => [self::class, 'status'],
-        ]);
-        register_rest_route(self::REST_NAMESPACE, '/inventory', $read + [
-            'callback' => [self::class, 'inventory'],
-        ]);
-        register_rest_route(self::REST_NAMESPACE, '/content', $read + [
-            'callback' => [self::class, 'content_list'],
-        ]);
-        register_rest_route(self::REST_NAMESPACE, '/content/(?P<id>\d+)', $read + [
-            'callback' => [self::class, 'content'],
-        ]);
-        register_rest_route(self::REST_NAMESPACE, '/changes/preview', $write + [
-            'callback' => [self::class, 'preview'],
-        ]);
-        register_rest_route(self::REST_NAMESPACE, '/changes/apply', $write + [
-            'callback' => [self::class, 'apply'],
-        ]);
-        register_rest_route(self::REST_NAMESPACE, '/changes/rollback', $write + [
-            'callback' => [self::class, 'rollback'],
-        ]);
+        register_rest_route(self::REST_NAMESPACE, '/status', $read + ['callback' => [self::class, 'status']]);
+        register_rest_route(self::REST_NAMESPACE, '/inventory', $read + ['callback' => [self::class, 'inventory']]);
+        register_rest_route(self::REST_NAMESPACE, '/content', $read + ['callback' => [self::class, 'content_list']]);
+        register_rest_route(self::REST_NAMESPACE, '/content/(?P<id>\d+)', $read + ['callback' => [self::class, 'content']]);
+        register_rest_route(self::REST_NAMESPACE, '/changes/preview', $write + ['callback' => [self::class, 'preview']]);
+        register_rest_route(self::REST_NAMESPACE, '/changes/apply', $write + ['callback' => [self::class, 'apply']]);
+        register_rest_route(self::REST_NAMESPACE, '/changes/rollback', $write + ['callback' => [self::class, 'rollback']]);
     }
 
     public static function authorize($request) {
@@ -157,14 +137,13 @@ final class CCF_Sites_Control {
     public static function status() {
         return self::response([
             'status' => 'ready',
-            'plugin' => [
-                'name' => 'CCF Sites & Ads Connector',
-                'version' => '1.1.1',
-            ],
+            'plugin' => ['name' => 'CCF Sites & Ads Connector', 'version' => defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.3.0'],
             'capabilities' => [
                 'wordpress.inventory.read',
                 'wordpress.content.read',
                 'wordpress.content.write',
+                'wordpress.content.schedule',
+                'wordpress.content.author.write',
                 'rank-math.read',
                 'rank-math.write',
                 'yootheme.builder.read',
@@ -198,10 +177,7 @@ final class CCF_Sites_Control {
         $theme = wp_get_theme();
         $post_types = [];
         foreach ((array) get_post_types(['public' => true], 'objects') as $type) {
-            $post_types[] = [
-                'name' => (string) $type->name,
-                'label' => (string) $type->label,
-            ];
+            $post_types[] = ['name' => (string) $type->name, 'label' => (string) $type->label];
         }
         return self::response([
             'wordpress' => [
@@ -209,6 +185,7 @@ final class CCF_Sites_Control {
                 'name' => (string) get_bloginfo('name'),
                 'url' => home_url('/'),
                 'language' => (string) get_bloginfo('language'),
+                'timezone' => function_exists('wp_timezone_string') ? (string) wp_timezone_string() : '',
             ],
             'theme' => [
                 'name' => (string) $theme->get('Name'),
@@ -229,10 +206,7 @@ final class CCF_Sites_Control {
             return new WP_Error('ccf_content_not_found', 'WordPress content was not found.', ['status' => 404]);
         }
         $snapshot = self::content_snapshot($post);
-        return self::response([
-            'content' => $snapshot,
-            'checksum' => self::checksum($snapshot),
-        ]);
+        return self::response(['content' => $snapshot, 'checksum' => self::checksum($snapshot)]);
     }
 
     public static function content_list($request) {
@@ -245,7 +219,7 @@ final class CCF_Sites_Control {
         $page = max(1, (int) $request->get_param('page'));
         $query = new WP_Query([
             'post_type' => $requested_type !== '' ? $requested_type : $public_types,
-            'post_status' => ['publish', 'draft', 'pending', 'private'],
+            'post_status' => ['publish', 'future', 'draft', 'pending', 'private'],
             'posts_per_page' => $per_page,
             'paged' => $page,
             's' => sanitize_text_field((string) $request->get_param('search')),
@@ -262,6 +236,9 @@ final class CCF_Sites_Control {
                 'slug' => $snapshot['slug'],
                 'status' => $snapshot['status'],
                 'title' => $snapshot['title'],
+                'date' => $snapshot['date'],
+                'date_gmt' => $snapshot['date_gmt'],
+                'author' => $snapshot['author'],
                 'modified_gmt' => $snapshot['modified_gmt'],
                 'permalink' => $snapshot['permalink'],
                 'checksum' => self::checksum($snapshot),
@@ -445,6 +422,9 @@ final class CCF_Sites_Control {
                 'post_content' => (string) $post->post_content,
                 'post_excerpt' => (string) $post->post_excerpt,
                 'post_status' => (string) $post->post_status,
+                'post_date' => (string) $post->post_date,
+                'post_date_gmt' => (string) $post->post_date_gmt,
+                'post_author' => (int) $post->post_author,
             ];
         }
         if ($operation === 'yootheme.builder.update') {
@@ -459,16 +439,71 @@ final class CCF_Sites_Control {
 
     private static function planned_snapshot(string $operation, array $before, array $changes) {
         if ($operation === 'post.update') {
-            $allowed = ['post_title', 'post_content', 'post_excerpt', 'post_status'];
+            $allowed = ['post_title', 'post_content', 'post_excerpt', 'post_status', 'post_date', 'post_date_gmt', 'post_author'];
             $after = $before;
+            $date_local = null;
+            $date_gmt = null;
+
             foreach ($changes as $key => $value) {
-                if (!in_array($key, $allowed, true) || !is_string($value)) {
-                    return new WP_Error('ccf_change_invalid', 'Post changes contain an unsupported field or value.', ['status' => 400]);
+                if (!in_array($key, $allowed, true)) {
+                    return new WP_Error('ccf_change_invalid', 'Post changes contain an unsupported field.', ['status' => 400]);
                 }
-                if ($key === 'post_status' && !in_array($value, ['draft', 'pending', 'private', 'publish'], true)) {
-                    return new WP_Error('ccf_change_invalid', 'The requested post status is not allowed.', ['status' => 400]);
+                if ($key === 'post_author') {
+                    $author_id = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+                    if ($author_id === false) {
+                        return new WP_Error('ccf_change_invalid', 'post_author must be a positive user ID.', ['status' => 400]);
+                    }
+                    $user = get_user_by('id', (int) $author_id);
+                    if (!$user || !user_can($user, 'edit_posts')) {
+                        return new WP_Error('ccf_change_invalid', 'The requested post author does not exist or cannot author posts.', ['status' => 400]);
+                    }
+                    $after[$key] = (int) $author_id;
+                    continue;
+                }
+                if (!is_string($value)) {
+                    return new WP_Error('ccf_change_invalid', 'Post changes contain an unsupported value.', ['status' => 400]);
+                }
+                if ($key === 'post_status') {
+                    if (!in_array($value, ['draft', 'pending', 'private', 'publish', 'future'], true)) {
+                        return new WP_Error('ccf_change_invalid', 'The requested post status is not allowed.', ['status' => 400]);
+                    }
+                    $after[$key] = $value;
+                    continue;
+                }
+                if ($key === 'post_date') {
+                    $date_local = self::normalize_mysql_datetime($value, wp_timezone());
+                    if (is_wp_error($date_local)) {
+                        return $date_local;
+                    }
+                    $after['post_date'] = $date_local;
+                    $after['post_date_gmt'] = get_gmt_from_date($date_local, 'Y-m-d H:i:s');
+                    continue;
+                }
+                if ($key === 'post_date_gmt') {
+                    $date_gmt = self::normalize_mysql_datetime($value, new DateTimeZone('UTC'));
+                    if (is_wp_error($date_gmt)) {
+                        return $date_gmt;
+                    }
+                    $after['post_date_gmt'] = $date_gmt;
+                    $after['post_date'] = get_date_from_gmt($date_gmt, 'Y-m-d H:i:s');
+                    continue;
                 }
                 $after[$key] = $key === 'post_content' ? wp_kses_post($value) : sanitize_text_field($value);
+            }
+
+            if ($date_local !== null && $date_gmt !== null && get_gmt_from_date($date_local, 'Y-m-d H:i:s') !== $date_gmt) {
+                return new WP_Error('ccf_change_invalid', 'post_date and post_date_gmt refer to different instants.', ['status' => 400]);
+            }
+            if (($after['post_status'] ?? '') === 'future') {
+                $scheduled = self::normalize_mysql_datetime((string) ($after['post_date'] ?? ''), wp_timezone());
+                if (is_wp_error($scheduled)) {
+                    return new WP_Error('ccf_change_invalid', 'A valid future post_date is required for scheduled publishing.', ['status' => 400]);
+                }
+                $scheduled_at = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $scheduled, wp_timezone());
+                $now = current_datetime();
+                if (!$scheduled_at || $scheduled_at <= $now) {
+                    return new WP_Error('ccf_change_invalid', 'Scheduled publishing requires a post_date in the future.', ['status' => 400]);
+                }
             }
             return $after;
         }
@@ -508,6 +543,16 @@ final class CCF_Sites_Control {
         return $after;
     }
 
+    private static function normalize_mysql_datetime(string $value, DateTimeZone $timezone) {
+        $value = trim($value);
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $value, $timezone);
+        $errors = DateTimeImmutable::getLastErrors();
+        if (!$date || ($errors !== false && ((int) $errors['warning_count'] > 0 || (int) $errors['error_count'] > 0)) || $date->format('Y-m-d H:i:s') !== $value) {
+            return new WP_Error('ccf_change_invalid', 'Dates must use the format Y-m-d H:i:s and be valid calendar dates.', ['status' => 400]);
+        }
+        return $date->format('Y-m-d H:i:s');
+    }
+
     private static function apply_snapshot(string $operation, array $target, array $snapshot) {
         if ($operation === 'site.option.update') {
             return update_option($target['option'], $snapshot['value'], false);
@@ -536,6 +581,7 @@ final class CCF_Sites_Control {
         foreach (self::SEO_META_KEYS as $key) {
             $seo[$key] = get_post_meta((int) $post->ID, $key, true);
         }
+        $author = get_user_by('id', (int) $post->post_author);
         return [
             'id' => (int) $post->ID,
             'type' => (string) $post->post_type,
@@ -544,7 +590,14 @@ final class CCF_Sites_Control {
             'title' => (string) $post->post_title,
             'content' => (string) $post->post_content,
             'excerpt' => (string) $post->post_excerpt,
+            'date' => (string) $post->post_date,
+            'date_gmt' => (string) $post->post_date_gmt,
             'modified_gmt' => (string) $post->post_modified_gmt,
+            'author' => [
+                'id' => (int) $post->post_author,
+                'display_name' => $author ? (string) $author->display_name : '',
+                'url' => $author && function_exists('get_author_posts_url') ? (string) get_author_posts_url((int) $post->post_author) : '',
+            ],
             'permalink' => get_permalink((int) $post->ID),
             'rank_math' => $seo,
             'yootheme_builder' => get_post_meta((int) $post->ID, '_yootheme_builder', true),
@@ -589,18 +642,12 @@ final class CCF_Sites_Control {
 
     private static function change_by_idempotency(string $key) {
         global $wpdb;
-        return $wpdb->get_row(
-            $wpdb->prepare('SELECT * FROM ' . self::table_name() . ' WHERE idempotency_key = %s', $key),
-            ARRAY_A
-        );
+        return $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . self::table_name() . ' WHERE idempotency_key = %s', $key), ARRAY_A);
     }
 
     private static function change_by_id(string $id) {
         global $wpdb;
-        return $wpdb->get_row(
-            $wpdb->prepare('SELECT * FROM ' . self::table_name() . ' WHERE id = %s', $id),
-            ARRAY_A
-        );
+        return $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . self::table_name() . ' WHERE id = %s', $id), ARRAY_A);
     }
 
     private static function public_change($row): array {
