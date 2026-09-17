@@ -1,7 +1,7 @@
 === CCF Sites & Ads Connector ===
 Contributors: cemfirat
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.3.2
 License: Proprietary / private project
 
 Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
@@ -48,6 +48,16 @@ The site token is server-side only. Browser requests use a short-lived same-orig
 Content-administration calls use the same signed server-to-server control boundary. Media import is limited to public HTTPS image sources and blocks private/reserved destinations, unsupported MIME types and files larger than 10 MB. Published content cannot be modified or trashed through the direct draft-first endpoints.
 
 == Changelog ==
+
+= 1.3.2 =
+* Restore the complete author-discovery implementation in the installable ZIP.
+* Package every maintained PHP include so new connector modules cannot be omitted silently.
+* Validate the required author module and PHP syntax in the built release artifact.
+* Rotate release metadata caching for immediate update discovery.
+
+= 1.3.1 =
+* Add safe discovery of WordPress authors who can edit posts.
+* Expose only public author identity fields and advertise the author-read capability.
 
 = 1.2.2 =
 * Preserve WordPress native update metadata even when the connector is already current, so the automatic-update toggle remains available.
