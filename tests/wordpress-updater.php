@@ -5,7 +5,7 @@ declare(strict_types=1);
 define('ABSPATH', __DIR__ . '/');
 $GLOBALS['ccf_filters'] = [];
 $GLOBALS['ccf_transients'] = [];
-$GLOBALS['ccf_release_version'] = '1.3.0';
+$GLOBALS['ccf_release_version'] = '1.3.1';
 
 function add_action(...$args): void {}
 function add_filter(string $name, $callback, int $priority = 10, int $accepted_args = 1): void {
@@ -36,7 +36,7 @@ function wp_remote_get(string $url, array $options): array {
     if ($url !== 'https://api.github.com/repos/cemfirat/ccf-sites-ads-wordpress-connector/releases/latest') {
         throw new RuntimeException('Unexpected release API URL.');
     }
-    if (($options['headers']['User-Agent'] ?? '') !== 'CCF-Sites-Ads-WordPress-Updater/1.2.2') {
+    if (($options['headers']['User-Agent'] ?? '') !== 'CCF-Sites-Ads-WordPress-Updater/1.3.0') {
         throw new RuntimeException('Updater user agent is missing or stale.');
     }
     $version = (string) $GLOBALS['ccf_release_version'];
@@ -59,8 +59,8 @@ function wp_remote_get(string $url, array $options): array {
 
 require __DIR__ . '/../wordpress/ccf-google-ads-site-connector.php';
 
-if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.2.2') {
-    throw new RuntimeException('Plugin version constant is not v1.2.2.');
+if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.3.0') {
+    throw new RuntimeException('Plugin version constant is not v1.3.0.');
 }
 
 $nativeFilters = $GLOBALS['ccf_filters']['update_plugins_github.com'] ?? [];
@@ -74,28 +74,28 @@ $native = CCF_Sites_Ads_Plugin_Updater::host_update(
     'ccf-google-ads-site-connector/ccf-google-ads-site-connector.php',
     ['de_DE']
 );
-if (!is_array($native) || ($native['version'] ?? '') !== '1.3.0') {
+if (!is_array($native) || ($native['version'] ?? '') !== '1.3.1') {
     throw new RuntimeException('Native Update URI hook did not return the newer stable release.');
 }
 if (array_key_exists('autoupdate', $native)) {
     throw new RuntimeException('Updater must not force an autoupdate preference.');
 }
-if (($native['package'] ?? '') !== 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector/releases/download/wordpress-v1.3.0/ccf-sites-ads-connector.zip') {
+if (($native['package'] ?? '') !== 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector/releases/download/wordpress-v1.3.1/ccf-sites-ads-connector.zip') {
     throw new RuntimeException('Native Update URI hook accepted an unexpected package URL.');
 }
 
 $transient = (object) [
-    'checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.2.2'],
+    'checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.3.0'],
     'response' => [],
     'no_update' => [],
 ];
 $updated = CCF_Sites_Ads_Plugin_Updater::check($transient);
 $offer = $updated->response['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php'] ?? null;
-if (!is_object($offer) || $offer->new_version !== '1.3.0') {
+if (!is_object($offer) || $offer->new_version !== '1.3.1') {
     throw new RuntimeException('A newer stable release was not offered through the compatibility path.');
 }
 
-$GLOBALS['ccf_release_version'] = '1.2.2';
+$GLOBALS['ccf_release_version'] = '1.3.0';
 delete_transient('ccf_sites_ads_github_release_v4');
 $nativeCurrent = CCF_Sites_Ads_Plugin_Updater::host_update(
     false,
@@ -103,18 +103,18 @@ $nativeCurrent = CCF_Sites_Ads_Plugin_Updater::host_update(
     'ccf-google-ads-site-connector/ccf-google-ads-site-connector.php',
     ['de_DE']
 );
-if (!is_array($nativeCurrent) || ($nativeCurrent['version'] ?? '') !== '1.2.2') {
+if (!is_array($nativeCurrent) || ($nativeCurrent['version'] ?? '') !== '1.3.0') {
     throw new RuntimeException('Native Update URI hook must return current release metadata when already up to date.');
 }
 
 $currentTransient = (object) [
-    'checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.2.2'],
+    'checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.3.0'],
     'response' => [],
     'no_update' => [],
 ];
 $current = CCF_Sites_Ads_Plugin_Updater::check($currentTransient);
 $noUpdate = $current->no_update['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php'] ?? null;
-if (!is_object($noUpdate) || ($noUpdate->new_version ?? '') !== '1.2.2') {
+if (!is_object($noUpdate) || ($noUpdate->new_version ?? '') !== '1.3.0') {
     throw new RuntimeException('Current plugin metadata was not preserved in no_update.');
 }
 if (isset($current->response['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php'])) {
