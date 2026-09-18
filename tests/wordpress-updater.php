@@ -34,7 +34,7 @@ function wp_remote_get(string $url, array $options): array {
 }
 
 require __DIR__ . '/../wordpress/ccf-google-ads-site-connector.php';
-if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.3.4') throw new RuntimeException('Plugin version constant is not v1.3.4.');
+if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.3.5') throw new RuntimeException('Plugin version constant is not v1.3.5.');
 $nativeFilters = $GLOBALS['ccf_filters']['update_plugins_github.com'] ?? [];
 if (count($nativeFilters) !== 1 || $nativeFilters[0][2] !== 4) throw new RuntimeException('Native Update URI hook is not registered correctly.');
 $refreshActions = $GLOBALS['ccf_actions']['load-update-core.php'] ?? [];
