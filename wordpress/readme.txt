@@ -1,7 +1,7 @@
 === CCF Sites & Ads Connector ===
 Contributors: cemfirat
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Stable tag: 1.3.6
 License: Proprietary / private project
 
 Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.

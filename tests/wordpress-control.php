@@ -19,7 +19,7 @@ $GLOBALS['ccf_post'] = [
     'post_name' => 'services',
     'post_status' => 'draft',
     'post_title' => 'Old title',
-    'post_content' => '<p>Old content</p>',
+    'post_content' => '<div uk-grid>Old & content \\ path</div>',
     'post_excerpt' => '',
     'post_date' => '2026-09-17 10:00:00',
     'post_date_gmt' => '2026-09-17 08:00:00',
@@ -105,7 +105,10 @@ class Test_WPDB {
 $GLOBALS['wpdb'] = new Test_WPDB();
 
 function add_action(...$args): void {}
-function add_filter(...$args): void {}
+function add_filter($tag, $callback, $priority = 10, $args = 1): void { $GLOBALS['ccf_filters'][$tag][$priority][] = $callback; }
+function remove_filter($tag, $callback, $priority = 10): void { $GLOBALS['ccf_filters'][$tag][$priority] = array_filter($GLOBALS['ccf_filters'][$tag][$priority] ?? [], fn($item) => $item !== $callback); }
+function wp_slash($value) { return is_array($value) ? array_map('wp_slash', $value) : (is_string($value) ? addslashes($value) : $value); }
+function wp_unslash($value) { return is_array($value) ? array_map('wp_unslash', $value) : (is_string($value) ? stripslashes($value) : $value); }
 function register_rest_route(...$args): void {}
 function register_activation_hook(...$args): void {}
 function is_wp_error($value): bool { return $value instanceof WP_Error; }
@@ -144,6 +147,11 @@ function get_post($id) {
 }
 function wp_update_post($data, $wp_error = false) {
     if ((int) ($data['ID'] ?? 0) !== 42) return $wp_error ? new WP_Error('missing', 'missing') : 0;
+    $postarr = $data;
+    // Simulate core unslashing and KSES filtering before wp_insert_post_data.
+    $data['post_content'] = str_replace(' uk-grid', '', $data['post_content'] ?? '');
+    foreach ($GLOBALS['ccf_filters']['wp_insert_post_data'] ?? [] as $callbacks) foreach ($callbacks as $callback) $data = $callback($data, $postarr);
+    $data = wp_unslash($data);
     unset($data['ID']);
     $GLOBALS['ccf_post'] = array_merge($GLOBALS['ccf_post'], $data);
     $GLOBALS['ccf_post']['post_modified_gmt'] = '2026-09-17 10:30:00';
@@ -304,5 +312,8 @@ $seo = CCF_Sites_Control::preview($seo_request);
 if (($seo->data['data']['preview']['diff']['rank_math_title']['after'] ?? '') !== 'New SEO title') {
     throw new RuntimeException('Rank Math preview failed.');
 }
+
+if ($GLOBALS['ccf_post']['post_content'] !== '<div uk-grid>Old & content \\ path</div>') throw new RuntimeException('Existing HTML or backslashes were altered.');
+if (!empty($GLOBALS['ccf_filters']['wp_insert_post_data'][PHP_INT_MAX])) throw new RuntimeException('Snapshot filter leaked beyond the write.');
 
 echo "WordPress control signature, scheduling, author, apply/verify, rollback, drift and SEO previews passed.\n";

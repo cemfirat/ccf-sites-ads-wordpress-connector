@@ -559,7 +559,24 @@ final class CCF_Sites_Control {
         }
         $post_id = (int) $target['post_id'];
         if ($operation === 'post.update') {
-            $result = wp_update_post(['ID' => $post_id] + $snapshot, true);
+            // Changed text was sanitized when planning; unchanged text and rollback
+            // snapshots must survive WordPress's save filters byte-for-byte.
+            $preserve_snapshot = static function ($data, $postarr) use ($post_id, $snapshot) {
+                if ((int) ($postarr['ID'] ?? 0) === $post_id) {
+                    foreach (['post_title', 'post_content', 'post_excerpt'] as $field) {
+                        if (array_key_exists($field, $snapshot)) {
+                            $data[$field] = wp_slash($snapshot[$field]);
+                        }
+                    }
+                }
+                return $data;
+            };
+            add_filter('wp_insert_post_data', $preserve_snapshot, PHP_INT_MAX, 2);
+            try {
+                $result = wp_update_post(wp_slash(['ID' => $post_id] + $snapshot), true);
+            } finally {
+                remove_filter('wp_insert_post_data', $preserve_snapshot, PHP_INT_MAX);
+            }
             return is_wp_error($result) ? $result : true;
         }
         if ($operation === 'yootheme.builder.update') {
