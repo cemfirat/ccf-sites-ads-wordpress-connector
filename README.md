@@ -12,6 +12,7 @@ Der gleiche Connector wird auf jeder verwalteten WordPress-Website installiert. 
 - neue Inhalte draft-first als `draft`, `pending` oder `private` anlegen
 - freigegebene Beiträge nativ über WordPress mit `future`, `post_date` und `post_date_gmt` terminieren
 - Beitragsautor über eine existierende WordPress-Benutzer-ID setzen; Benutzer ohne `edit_posts` werden abgelehnt
+- redaktionelle Autorenrollen ausschließlich auf die WordPress-Standardrollen `contributor` oder `author` begrenzen; privilegierte Benutzer bleiben gesperrt
 - geplante Beiträge samt Datum und Autor im zentralen Content-Inventar lesen
 - öffentliche Taxonomien, Kategorien, Schlagwörter und Begriffe verwalten
 - ACF-Felder auf unveröffentlichten Inhalten lesen und aktualisieren
@@ -24,7 +25,9 @@ Direktes unkontrolliertes Publizieren oder Verändern veröffentlichter Inhalte 
 
 ## Autoren und SEO
 
-Für Blogbeiträge sollte der sichtbare WordPress-Autor einer echten redaktionell verantwortlichen Person oder einer klar bezeichneten Redaktion entsprechen. Technische Konten wie `ambra-ai` oder `developez` sollten nicht als öffentliche Autoren verwendet werden, wenn sie keine tatsächlichen Verfasser sind.
+Für Blogbeiträge sollte der sichtbare WordPress-Autor einer echten redaktionell verantwortlichen Person oder einer klar bezeichneten Redaktion entsprechen. Technische Administrations- oder Connector-Konten sollten nicht als öffentliche Autoren verwendet werden, wenn sie keine tatsächlichen Verfasser sind.
+
+Der Connector legt keine kundenspezifischen WordPress-Rollen an. Wenn ein bestehender Benutzer als redaktioneller Autor verwendet wird, kann CCF ihn ausschließlich auf die WordPress-Standardrollen `contributor` oder `author` setzen. Administratoren, Editoren und andere privilegierte Benutzer werden von dieser Rollenfunktion ausdrücklich nicht verändert.
 
 Rank Math übernimmt für Article-/BlogPosting-Schema standardmäßig den primären WordPress-Autor. Deshalb sollte der Autorenname konsistent, glaubwürdig und – sofern Autor-Archive verwendet werden – über eine eindeutige Profilseite identifizierbar sein. Der Publisher bleibt davon getrennt die Organisation/Website.
 
