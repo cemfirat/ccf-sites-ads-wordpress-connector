@@ -41,6 +41,8 @@ final class CCF_Sites_Status_Overlay {
             'acf.read',
             'acf.write-unpublished',
             'rank-math.draft-write',
+            'rank-math.abilities.read',
+            'rank-math.abilities.execute',
         ])));
         $envelope['data'] = $data;
         $response->set_data($envelope);
