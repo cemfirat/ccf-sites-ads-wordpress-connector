@@ -9,6 +9,7 @@ Der gleiche Connector wird auf jeder verwalteten WordPress-Website installiert. 
 - WordPress-, Theme- und Plugin-Inventar lesen
 - Seiten, Beiträge und öffentliche Post-Types lesen
 - bestehende Inhalte, Rank Math und YOOtheme über Preview/Freigabe/Verifikation/Rollback ändern
+- die nativen Rank-Math-WordPress-Abilities dynamisch entdecken und ausführen, inklusive SEO-Score 0–100, vollständiger On-Page-Analyse, Schema, Linkreport, Redirections, Einstellungen, Audits und zukünftiger öffentlicher Rank-Math-Abilities
 - neue Inhalte draft-first als `draft`, `pending` oder `private` anlegen
 - freigegebene Beiträge nativ über WordPress mit `future`, `post_date` und `post_date_gmt` terminieren
 - Beitragsautor über eine existierende WordPress-Benutzer-ID setzen; Benutzer ohne `edit_posts` werden abgelehnt
