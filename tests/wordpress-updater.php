@@ -28,13 +28,13 @@ function esc_url_raw(string $value): string { return filter_var($value, FILTER_V
 function esc_html(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 function wp_remote_get(string $url, array $options): array {
     if ($url !== 'https://api.github.com/repos/cemfirat/ccf-sites-ads-wordpress-connector/releases/latest') throw new RuntimeException('Unexpected release API URL.');
-    if (($options['headers']['User-Agent'] ?? '') !== 'CCF-Sites-Ads-WordPress-Updater/1.3.4') throw new RuntimeException('Updater user agent is missing or stale.');
+    if (($options['headers']['User-Agent'] ?? '') !== 'CCF-Sites-Ads-WordPress-Updater/1.3.5') throw new RuntimeException('Updater user agent is missing or stale.');
     $version = (string) $GLOBALS['ccf_release_version'];
     return ['response' => ['code' => 200], 'body' => json_encode(['tag_name' => 'wordpress-v' . $version, 'html_url' => 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector/releases/tag/wordpress-v' . $version, 'draft' => false, 'prerelease' => false, 'target_commitish' => 'main', 'body' => 'Updater test release', 'assets' => [['name' => 'ccf-sites-ads-connector.zip', 'browser_download_url' => 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector/releases/download/wordpress-v' . $version . '/ccf-sites-ads-connector.zip']]], JSON_THROW_ON_ERROR)];
 }
 
 require __DIR__ . '/../wordpress/ccf-google-ads-site-connector.php';
-if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.3.4') throw new RuntimeException('Plugin version constant is not v1.3.4.');
+if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.3.5') throw new RuntimeException('Plugin version constant is not v1.3.5.');
 $nativeFilters = $GLOBALS['ccf_filters']['update_plugins_github.com'] ?? [];
 if (count($nativeFilters) !== 1 || $nativeFilters[0][2] !== 4) throw new RuntimeException('Native Update URI hook is not registered correctly.');
 $refreshActions = $GLOBALS['ccf_actions']['load-update-core.php'] ?? [];
@@ -51,13 +51,13 @@ CCF_Sites_Ads_Plugin_Updater::refresh_on_manual_check();
 if (isset($GLOBALS['ccf_transients']['ccf_sites_ads_github_release_v6'])) throw new RuntimeException('Forced WordPress update check did not clear connector release cache.');
 unset($_GET['force-check']);
 
-$GLOBALS['ccf_release_version'] = '1.3.4';
+$GLOBALS['ccf_release_version'] = '1.3.5';
 delete_transient('ccf_sites_ads_github_release_v6');
 $nativeCurrent = CCF_Sites_Ads_Plugin_Updater::host_update(false, ['UpdateURI' => 'https://github.com/cemfirat/ccf-sites-ads-wordpress-connector'], 'ccf-google-ads-site-connector/ccf-google-ads-site-connector.php', ['de_DE']);
-if (!is_array($nativeCurrent) || ($nativeCurrent['version'] ?? '') !== '1.3.4') throw new RuntimeException('Native Update URI hook must return current release metadata when already up to date.');
-$currentTransient = (object) ['checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.3.4'], 'response' => [], 'no_update' => []];
+if (!is_array($nativeCurrent) || ($nativeCurrent['version'] ?? '') !== '1.3.5') throw new RuntimeException('Native Update URI hook must return current release metadata when already up to date.');
+$currentTransient = (object) ['checked' => ['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php' => '1.3.5'], 'response' => [], 'no_update' => []];
 $current = CCF_Sites_Ads_Plugin_Updater::check($currentTransient);
 $noUpdate = $current->no_update['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php'] ?? null;
-if (!is_object($noUpdate) || ($noUpdate->new_version ?? '') !== '1.3.4') throw new RuntimeException('Current plugin metadata was not preserved in no_update.');
+if (!is_object($noUpdate) || ($noUpdate->new_version ?? '') !== '1.3.5') throw new RuntimeException('Current plugin metadata was not preserved in no_update.');
 if (isset($current->response['ccf-google-ads-site-connector/ccf-google-ads-site-connector.php'])) throw new RuntimeException('Current version must not be offered as an update.');
 echo "WordPress updater discovery, forced refresh and auto-update support passed.\n";

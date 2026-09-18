@@ -5,14 +5,29 @@ defined('ABSPATH') || exit;
 /**
  * Safe editorial author support for CCF Sites & Ads.
  *
- * Read operations expose only public author identity data. The profile write
- * surface is deliberately restricted to the public display name; e-mail,
- * login, password, roles and capabilities cannot be changed here.
+ * The connector exposes editorial identity data only. Profile changes are
+ * restricted to the public display name. Role changes are restricted to the
+ * built-in WordPress contributor/author roles and are blocked for privileged
+ * users. E-mail, login, password and arbitrary capabilities are never changed.
  */
 final class CCF_Sites_Authors {
     private const READ_CAPABILITY = 'wordpress.content.author.read';
     private const PROFILE_WRITE_CAPABILITY = 'wordpress.author.profile.write';
+    private const ROLE_WRITE_CAPABILITY = 'wordpress.author.role.write';
     private const REST_NAMESPACE = 'ccf-sites/v1';
+    private const ALLOWED_EDITORIAL_ROLES = ['contributor', 'author'];
+    private const PRIVILEGED_CAPABILITIES = [
+        'manage_options',
+        'edit_users',
+        'promote_users',
+        'create_users',
+        'delete_users',
+        'activate_plugins',
+        'edit_theme_options',
+        'edit_others_posts',
+        'delete_others_posts',
+        'publish_pages',
+    ];
 
     public static function init(): void {
         add_filter('rest_post_dispatch', [self::class, 'augment_control_response'], 10, 3);
@@ -24,6 +39,11 @@ final class CCF_Sites_Authors {
             'methods' => 'POST',
             'permission_callback' => [CCF_Sites_Control::class, 'authorize'],
             'callback' => [self::class, 'update_profile'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/authors/(?P<id>\\d+)/role', [
+            'methods' => 'POST',
+            'permission_callback' => [CCF_Sites_Control::class, 'authorize'],
+            'callback' => [self::class, 'update_role'],
         ]);
     }
 
@@ -90,6 +110,45 @@ final class CCF_Sites_Authors {
         return self::response(['author' => $snapshot]);
     }
 
+    public static function update_role($request) {
+        $id = isset($request['id']) ? (int) $request['id'] : 0;
+        if ($id <= 0 || !function_exists('get_user_by') || !function_exists('user_can')) {
+            return self::error('ccf_author_invalid', 'A valid author ID is required.', 400);
+        }
+
+        $user = get_user_by('id', $id);
+        if (!$user || !user_can($user, 'edit_posts')) {
+            return self::error('ccf_author_not_found', 'An eligible WordPress author was not found.', 404);
+        }
+        if (self::is_privileged_user($user)) {
+            return self::error('ccf_author_role_forbidden', 'Privileged WordPress users cannot be changed through the editorial author role endpoint.', 403);
+        }
+
+        $body = self::body($request);
+        $role = sanitize_key((string) ($body['role'] ?? ''));
+        if (!in_array($role, self::ALLOWED_EDITORIAL_ROLES, true)) {
+            return self::error('ccf_author_role_invalid', 'role must be contributor or author.', 400);
+        }
+        if (!function_exists('get_role') || !get_role($role) || !method_exists($user, 'set_role')) {
+            return self::error('ccf_author_role_unavailable', 'The requested WordPress role is unavailable.', 500);
+        }
+
+        $current_roles = self::role_slugs($user);
+        if ($current_roles === [$role]) {
+            $snapshot = self::author_snapshot($user);
+            return self::response(['author' => $snapshot, 'changed' => false]);
+        }
+
+        $user->set_role($role);
+        $updated = get_user_by('id', $id);
+        $snapshot = self::author_snapshot($updated);
+        if ($snapshot === null || ($snapshot['roles'] ?? []) !== [$role]) {
+            return self::error('ccf_author_role_update_failed', 'The author role update could not be verified.', 500);
+        }
+
+        return self::response(['author' => $snapshot, 'changed' => true]);
+    }
+
     public static function augment_control_response($response, $server, $request) {
         if (!is_object($request) || !method_exists($request, 'get_route')) {
             return $response;
@@ -112,7 +171,7 @@ final class CCF_Sites_Authors {
             $capabilities = isset($payload['data']['capabilities']) && is_array($payload['data']['capabilities'])
                 ? $payload['data']['capabilities']
                 : [];
-            foreach ([self::READ_CAPABILITY, self::PROFILE_WRITE_CAPABILITY] as $capability) {
+            foreach ([self::READ_CAPABILITY, self::PROFILE_WRITE_CAPABILITY, self::ROLE_WRITE_CAPABILITY] as $capability) {
                 if (!in_array($capability, $capabilities, true)) {
                     $capabilities[] = $capability;
                 }
@@ -143,7 +202,24 @@ final class CCF_Sites_Authors {
             'slug' => $slug,
             'author_url' => $author_url,
             'can_edit_posts' => true,
+            'roles' => self::role_slugs($user),
         ];
+    }
+
+    private static function role_slugs($user): array {
+        $roles = isset($user->roles) && is_array($user->roles) ? $user->roles : [];
+        $roles = array_values(array_unique(array_filter(array_map('sanitize_key', $roles))));
+        sort($roles, SORT_STRING);
+        return $roles;
+    }
+
+    private static function is_privileged_user($user): bool {
+        foreach (self::PRIVILEGED_CAPABILITIES as $capability) {
+            if (user_can($user, $capability)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static function body($request): array {
