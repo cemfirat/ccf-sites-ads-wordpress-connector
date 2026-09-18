@@ -92,12 +92,14 @@ if ($other->get_data() !== ['data' => ['unchanged' => true]]) throw new RuntimeE
 echo "WordPress safe author discovery passed.\n";
 
 
-final class Test_Role_Request {
+final class Test_Role_Request implements ArrayAccess {
     private $id;
     private $body;
     public function __construct(int $id, array $body) { $this->id = $id; $this->body = $body; }
     public function offsetExists($offset): bool { return $offset === 'id'; }
     public function offsetGet($offset) { return $offset === 'id' ? $this->id : null; }
+    public function offsetSet($offset, $value): void { throw new RuntimeException('read only'); }
+    public function offsetUnset($offset): void { throw new RuntimeException('read only'); }
     public function get_body(): string { return json_encode($this->body); }
 }
 
