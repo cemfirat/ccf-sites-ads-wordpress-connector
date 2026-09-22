@@ -78,6 +78,8 @@ class Test_Request implements ArrayAccess {
 
 class Test_WPDB {
     public $prefix = 'wp_';
+    public $options = 'wp_options';
+    public $dbname = 'wordpress_test';
     private $rows = [];
     public function get_charset_collate(): string { return ''; }
     public function insert($table, $data, $formats = []) {
@@ -90,9 +92,19 @@ class Test_WPDB {
         $this->rows[$id] = array_merge($this->rows[$id], $data);
         return 1;
     }
-    public function prepare($query, $value) { return [$query, $value]; }
+    public function esc_like($value) { return addcslashes((string) $value, '_%\\'); }
+    public function prepare($query, ...$values) { return array_merge([$query], $values); }
+    public function get_var($prepared) {
+        $query = is_array($prepared) ? (string) ($prepared[0] ?? '') : (string) $prepared;
+        if (strpos($query, 'information_schema.TABLES') !== false) return 125000000;
+        if (strpos($query, 'SHOW TABLES LIKE') !== false) return 'wp_actionscheduler_actions';
+        if (strpos($query, 'option_name LIKE') !== false) return 18;
+        if (strpos($query, 'actionscheduler_actions') !== false && strpos($query, 'COUNT(*)') !== false) return 3;
+        return null;
+    }
     public function get_row($prepared, $format = null) {
-        [$query, $value] = $prepared;
+        $query = (string) ($prepared[0] ?? '');
+        $value = $prepared[1] ?? null;
         if (strpos($query, 'idempotency_key') !== false) {
             foreach ($this->rows as $row) {
                 if (($row['idempotency_key'] ?? '') === $value) return $row;
@@ -119,6 +131,30 @@ function wp_json_encode($value): string { return (string) json_encode($value, JS
 function get_transient($key) { return $GLOBALS['ccf_transients'][$key] ?? false; }
 function set_transient($key, $value, $ttl): bool { $GLOBALS['ccf_transients'][$key] = $value; return true; }
 function get_option($name, $default = false) { return $default; }
+function get_plugins(): array {
+    return ['example/example.php' => ['Name' => 'Example Plugin', 'Version' => '1.0.0']];
+}
+function wp_get_theme() {
+    return new class {
+        public function get($key) { return $key === 'Name' ? 'Example Theme' : ($key === 'Version' ? '2.0.0' : ''); }
+        public function get_stylesheet(): string { return 'example'; }
+        public function get_template(): string { return 'example'; }
+    };
+}
+function get_post_types($args = [], $output = 'names') {
+    return $output === 'objects' ? ['post' => (object) ['name' => 'post', 'label' => 'Posts']] : ['post'];
+}
+function get_bloginfo($key): string {
+    $values = ['version' => '6.9.1', 'name' => 'Example Site', 'language' => 'de-DE'];
+    return $values[$key] ?? '';
+}
+function wp_load_alloptions(): array { return ['small' => 'abc', 'nested' => ['one' => 'two']]; }
+function maybe_serialize($value): string { return serialize($value); }
+function wp_count_posts($type) { return (object) ['inherit' => $type === 'revision' ? 7 : 0]; }
+function _get_cron_array(): array {
+    return [1700000000 => ['hook_a' => ['a' => [], 'b' => []]], 1700000100 => ['hook_b' => ['c' => []]]];
+}
+function wp_using_ext_object_cache(): bool { return true; }
 function wp_salt($scheme): string { return 'test-salt-' . $scheme; }
 function esc_url_raw($value): string { return (string) $value; }
 function wp_parse_url($value, $component = -1) { return parse_url((string) $value, $component); }
@@ -184,6 +220,22 @@ if (CCF_Sites_Control::authorize($signed) !== true) {
 $replay = CCF_Sites_Control::authorize($signed);
 if (!$replay instanceof WP_Error || $replay->code !== 'ccf_control_replay') {
     throw new RuntimeException('Control nonce replay was not blocked.');
+}
+
+$inventory = CCF_Sites_Control::inventory();
+if (!$inventory instanceof WP_REST_Response || $inventory->status !== 200) {
+    throw new RuntimeException('Inventory request failed.');
+}
+$database = $inventory->data['data']['database'] ?? null;
+if (!is_array($database)) throw new RuntimeException('Performance inventory is missing.');
+if (($database['size_bytes'] ?? null) !== 125000000) throw new RuntimeException('Database size was not measured.');
+if (($database['revisions'] ?? null) !== 7) throw new RuntimeException('Revision count was not measured.');
+if (($database['transients'] ?? null) !== 18) throw new RuntimeException('Transient count was not measured.');
+if (($database['cron_events'] ?? null) !== 3) throw new RuntimeException('Cron event count was not measured.');
+if (($database['action_scheduler_pending'] ?? null) !== 3) throw new RuntimeException('Action Scheduler pending count was not measured.');
+if (($database['persistent_object_cache'] ?? null) !== true) throw new RuntimeException('Persistent object cache state was not measured.');
+if (!is_int($database['autoloaded_options_size'] ?? null) || $database['autoloaded_options_size'] <= 0) {
+    throw new RuntimeException('Autoloaded options size was not measured.');
 }
 
 $preview_request = new Test_Request(
