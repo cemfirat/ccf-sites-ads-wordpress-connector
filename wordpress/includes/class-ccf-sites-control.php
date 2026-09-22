@@ -195,6 +195,7 @@ final class CCF_Sites_Control {
             ],
             'plugins' => $plugins,
             'post_types' => $post_types,
+            'database' => self::performance_inventory(),
             'integrations' => self::integration_status(),
         ]);
     }
@@ -618,6 +619,100 @@ final class CCF_Sites_Control {
             'permalink' => get_permalink((int) $post->ID),
             'rank_math' => $seo,
             'yootheme_builder' => get_post_meta((int) $post->ID, '_yootheme_builder', true),
+        ];
+    }
+
+    private static function performance_inventory(): array {
+        global $wpdb;
+
+        $autoloaded_options_size = null;
+        if (function_exists('wp_load_alloptions')) {
+            $autoloaded_options_size = 0;
+            foreach ((array) wp_load_alloptions() as $value) {
+                if ((is_array($value) || is_object($value)) && function_exists('maybe_serialize')) {
+                    $value = maybe_serialize($value);
+                }
+                $autoloaded_options_size += strlen((string) $value);
+            }
+        }
+
+        $database_size_bytes = null;
+        $database_name = defined('DB_NAME') ? (string) DB_NAME : (isset($wpdb->dbname) ? (string) $wpdb->dbname : '');
+        if ($database_name !== '' && method_exists($wpdb, 'get_var') && method_exists($wpdb, 'prepare')) {
+            $like = method_exists($wpdb, 'esc_like') ? $wpdb->esc_like((string) $wpdb->prefix) . '%' : (string) $wpdb->prefix . '%';
+            $value = $wpdb->get_var($wpdb->prepare(
+                'SELECT SUM(data_length + index_length) FROM information_schema.TABLES WHERE table_schema = %s AND table_name LIKE %s',
+                $database_name,
+                $like
+            ));
+            if (is_numeric($value)) {
+                $database_size_bytes = (int) $value;
+            }
+        }
+
+        $revisions = null;
+        if (function_exists('wp_count_posts')) {
+            $counts = wp_count_posts('revision');
+            if (is_object($counts) && isset($counts->inherit) && is_numeric($counts->inherit)) {
+                $revisions = (int) $counts->inherit;
+            }
+        }
+
+        $transients = null;
+        if (isset($wpdb->options) && method_exists($wpdb, 'get_var')) {
+            $transient_count = $wpdb->get_var(
+                "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_%' OR option_name LIKE '_site_transient_%'"
+            );
+            if (is_numeric($transient_count)) {
+                $transients = (int) $transient_count;
+            }
+        }
+
+        $cron_events = null;
+        if (function_exists('_get_cron_array')) {
+            $cron = _get_cron_array();
+            if (is_array($cron)) {
+                $cron_events = 0;
+                foreach ($cron as $hooks) {
+                    if (!is_array($hooks)) continue;
+                    foreach ($hooks as $events) {
+                        if (is_array($events)) {
+                            $cron_events += count($events);
+                        }
+                    }
+                }
+            }
+        }
+
+        $action_scheduler_pending = null;
+        if (isset($wpdb->prefix) && method_exists($wpdb, 'get_var')) {
+            $actions_table = (string) $wpdb->prefix . 'actionscheduler_actions';
+            $table_exists = $wpdb->get_var(
+                method_exists($wpdb, 'prepare')
+                    ? $wpdb->prepare('SHOW TABLES LIKE %s', $actions_table)
+                    : "SHOW TABLES LIKE '" . addslashes($actions_table) . "'"
+            );
+            if ((string) $table_exists === $actions_table) {
+                $pending = $wpdb->get_var(
+                    "SELECT COUNT(*) FROM {$actions_table} WHERE status = 'pending'"
+                );
+                if (is_numeric($pending)) {
+                    $action_scheduler_pending = (int) $pending;
+                }
+            }
+        }
+
+        return [
+            'autoloaded_options_size' => $autoloaded_options_size,
+            'size_bytes' => $database_size_bytes,
+            'revisions' => $revisions,
+            'transients' => $transients,
+            'cron_events' => $cron_events,
+            'action_scheduler_pending' => $action_scheduler_pending,
+            'persistent_object_cache' => function_exists('wp_using_ext_object_cache')
+                ? (bool) wp_using_ext_object_cache()
+                : null,
+            'page_cache' => null,
         ];
     }
 
