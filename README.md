@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="Cem Firat logo" width="120" />
+</p>
+
 # CCF Sites & Ads WordPress Connector
 
 Öffentlicher, geprüfter Release-Kanal für den universellen WordPress-Connector von CCF Sites & Ads.
