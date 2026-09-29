@@ -1,5 +1,6 @@
 === CCF Sites & Ads Connector ===
 Contributors: cemfirat
+Requires at least: 6.0
 Requires PHP: 7.4
 Stable tag: 1.3.8
 License: Proprietary / private project
