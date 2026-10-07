@@ -1,6 +1,12 @@
 # Changelog
 
-All notable changes to the CCF Sites & Ads WordPress Connector are documented here.
+All notable changes to the Harika Connector are documented here.
+
+## 1.3.10 - 2026-10-07
+
+- Rename the installable connector to Harika Connector.
+- Point the release channel at `cemfirat/harika-wordpress-connector` and keep accepting the previous repository URL until existing sites have updated.
+- Keep the WordPress plugin slug and the `ccf-sites-ads-connector.zip` asset name so an installed connector updates in place.
 
 ## 1.3.9 - 2026-10-07
 

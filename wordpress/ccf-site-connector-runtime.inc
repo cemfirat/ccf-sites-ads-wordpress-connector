@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: CCF Sites & Ads Connector
- * Description: Secure WordPress control and conversion connector for CCF Sites & Ads.
+ * Plugin Name: Harika Connector
+ * Description: Secure WordPress control and conversion connector for Harika.
  * Version: 1.1.1
  * Author: Cem Firat
  * Requires PHP: 7.4
- * Update URI: https://github.com/cemfirat/ccf-sites-ads-wordpress-connector
+ * Update URI: https://github.com/cemfirat/harika-wordpress-connector
  */
 
 defined('ABSPATH') || exit;
@@ -13,7 +13,8 @@ defined('ABSPATH') || exit;
 final class CCF_Google_Ads_Site_Connector {
     private const VERSION = '1.1.1';
     private const PLUGIN_SLUG = 'ccf-google-ads-site-connector';
-    private const GITHUB_REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
+    private const GITHUB_REPOSITORY = 'cemfirat/harika-wordpress-connector';
+    private const LEGACY_REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
     private const RELEASE_ASSET = 'ccf-sites-ads-connector.zip';
     private const RELEASE_CACHE_KEY = 'ccf_sites_ads_github_release_v1';
     private const REST_NAMESPACE = 'ccf-google-ads/v1';
@@ -63,7 +64,7 @@ final class CCF_Google_Ads_Site_Connector {
             return $result;
         }
         return (object) [
-            'name' => 'CCF Sites & Ads Connector',
+            'name' => 'Harika Connector',
             'slug' => self::PLUGIN_SLUG,
             'version' => $release['version'],
             'author' => 'Cem Firat',
@@ -73,7 +74,7 @@ final class CCF_Google_Ads_Site_Connector {
             'tested' => $release['tested'],
             'download_link' => $release['package'],
             'sections' => [
-                'description' => 'Sicherer WordPress-, Rank-Math-, YOOtheme- und Conversion-Connector für CCF Sites & Ads.',
+                'description' => 'Sicherer WordPress-, Rank-Math-, YOOtheme- und Conversion-Connector für Harika.',
                 'changelog' => nl2br(esc_html($release['notes'])),
             ],
         ];
@@ -109,8 +110,15 @@ final class CCF_Google_Ads_Site_Connector {
             return null;
         }
         $release_url = isset($payload['html_url']) ? esc_url_raw((string) $payload['html_url']) : '';
-        $release_prefix = 'https://github.com/' . self::GITHUB_REPOSITORY . '/releases/';
-        if ($release_url === '' || strpos($release_url, $release_prefix) !== 0) {
+        $release_prefix = '';
+        foreach ([self::GITHUB_REPOSITORY, self::LEGACY_REPOSITORY] as $repository) {
+            $candidate_prefix = 'https://github.com/' . $repository . '/releases/';
+            if ($release_url !== '' && strpos($release_url, $candidate_prefix) === 0) {
+                $release_prefix = $candidate_prefix;
+                break;
+            }
+        }
+        if ($release_prefix === '') {
             return null;
         }
         $package = '';
@@ -134,7 +142,7 @@ final class CCF_Google_Ads_Site_Connector {
             'tested' => isset($payload['target_commitish']) ? '6.8' : '6.0',
             'notes' => isset($payload['body']) && is_string($payload['body'])
                 ? substr($payload['body'], 0, 8_000)
-                : 'Aktualisierung des CCF Sites & Ads Connectors.',
+                : 'Aktualisierung des Harika Connectors.',
         ];
         set_transient(self::RELEASE_CACHE_KEY, $release, 6 * 60 * 60);
         return $release;
@@ -142,8 +150,8 @@ final class CCF_Google_Ads_Site_Connector {
 
     public static function register_admin_page(): void {
         add_options_page(
-            'CCF Sites & Ads',
-            'CCF Sites & Ads',
+            'Harika Connector',
+            'Harika Connector',
             'manage_options',
             'ccf-google-ads',
             [self::class, 'render_settings_page']
@@ -221,7 +229,7 @@ final class CCF_Google_Ads_Site_Connector {
         $configured = self::site_token() !== '';
         ?>
         <div class="wrap">
-            <h1>CCF Sites &amp; Ads Connector</h1>
+            <h1>Harika Connector</h1>
             <p>Der Site-Token wird mit den WordPress-Server-Salts verschlüsselt gespeichert und niemals im Browser ausgegeben.</p>
             <?php settings_errors(self::OPTION_NAME); ?>
             <form action="options.php" method="post" autocomplete="off">

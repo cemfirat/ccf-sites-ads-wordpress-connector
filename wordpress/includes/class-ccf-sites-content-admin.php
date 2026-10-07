@@ -3,7 +3,7 @@
 defined('ABSPATH') || exit;
 
 /**
- * Low-risk content administration surface for CCF Sites & Ads.
+ * Low-risk content administration surface for Harika.
  *
  * Published content is deliberately not changed here. Existing published
  * content continues to use the preview/approval/apply path in CCF_Sites_Control.

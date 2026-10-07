@@ -1,18 +1,18 @@
 <?php
 /**
- * Plugin Name: CCF Sites & Ads Connector
- * Description: Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
- * Version: 1.3.9
+ * Plugin Name: Harika Connector
+ * Description: Secure WordPress control, content administration and conversion connector for Harika.
+ * Version: 1.3.10
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Cem Firat
- * Update URI: https://github.com/cemfirat/ccf-sites-ads-wordpress-connector
+ * Update URI: https://github.com/cemfirat/harika-wordpress-connector
  * Text Domain: ccf-google-ads-site-connector
  */
 
 defined('ABSPATH') || exit;
 
-define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.9');
+define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.10');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/ccf-site-connector-runtime.inc';
@@ -34,9 +34,10 @@ require_once __DIR__ . '/includes/class-ccf-sites-authors.php';
 CCF_Sites_Authors::init();
 
 final class CCF_Sites_Ads_Plugin_Updater {
-    private const REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
+    private const REPOSITORY = 'cemfirat/harika-wordpress-connector';
+    private const LEGACY_REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
     private const ASSET = 'ccf-sites-ads-connector.zip';
-    private const CACHE_KEY = 'ccf_sites_ads_github_release_v6';
+    private const CACHE_KEY = 'ccf_sites_ads_github_release_v7';
     private const CACHE_TTL = 5 * 60;
 
     public static function init(): void {
@@ -53,7 +54,7 @@ final class CCF_Sites_Ads_Plugin_Updater {
     }
 
     public static function host_update($update, $plugin_data, $plugin_file, $locales) {
-        if (($plugin_data['UpdateURI'] ?? '') !== 'https://github.com/' . self::REPOSITORY) return $update;
+        if (!self::is_our_update_uri((string) ($plugin_data['UpdateURI'] ?? ''))) return $update;
         $release = self::latest_release();
         return $release === null ? $update : self::update_payload($release);
     }
@@ -81,23 +82,43 @@ final class CCF_Sites_Ads_Plugin_Updater {
         if ($action !== 'plugin_information' || !is_object($args) || ($args->slug ?? '') !== 'ccf-google-ads-site-connector') return $result;
         $release = self::latest_release();
         if ($release === null) return $result;
-        return (object) ['name'=>'CCF Sites & Ads Connector','slug'=>'ccf-google-ads-site-connector','version'=>$release['version'],'author'=>'Cem Firat','homepage'=>'https://github.com/'.self::REPOSITORY,'requires'=>'6.0','requires_php'=>'7.4','tested'=>$release['tested'],'download_link'=>$release['package'],'sections'=>['description'=>'Sicherer WordPress-, Rank-Math-, YOOtheme-, ACF-, Content- und Conversion-Connector für CCF Sites & Ads.','changelog'=>nl2br(esc_html($release['notes']))]];
+        return (object) ['name'=>'Harika Connector','slug'=>'ccf-google-ads-site-connector','version'=>$release['version'],'author'=>'Cem Firat','homepage'=>'https://github.com/'.self::REPOSITORY,'requires'=>'6.0','requires_php'=>'7.4','tested'=>$release['tested'],'download_link'=>$release['package'],'sections'=>['description'=>'Sicherer WordPress-, Rank-Math-, YOOtheme-, ACF-, Content- und Conversion-Connector für Harika.','changelog'=>nl2br(esc_html($release['notes']))]];
     }
 
-    private static function update_payload(array $release): array { return ['id'=>'https://github.com/'.self::REPOSITORY,'slug'=>'ccf-google-ads-site-connector','version'=>$release['version'],'new_version'=>$release['version'],'url'=>$release['url'],'package'=>$release['package'],'tested'=>$release['tested'],'requires_php'=>'7.4']; }
+    private static function update_payload(array $release): array { return ['id'=>'https://github.com/'.$release['repository'],'slug'=>'ccf-google-ads-site-connector','version'=>$release['version'],'new_version'=>$release['version'],'url'=>$release['url'],'package'=>$release['package'],'tested'=>$release['tested'],'requires_php'=>'7.4']; }
 
     private static function latest_release(): ?array {
-        $cached = get_transient(self::CACHE_KEY); if (is_array($cached)) return $cached;
-        $response = wp_remote_get('https://api.github.com/repos/'.self::REPOSITORY.'/releases/latest',['timeout'=>10,'redirection'=>2,'headers'=>['Accept'=>'application/vnd.github+json','X-GitHub-Api-Version'=>'2022-11-28','User-Agent'=>'CCF-Sites-Ads-WordPress-Updater/'.CCF_SITES_ADS_PLUGIN_VERSION]]);
+        $cached = get_transient(self::CACHE_KEY); if (is_array($cached) && isset($cached['repository'], $cached['package'])) return $cached;
+        foreach ([self::REPOSITORY, self::LEGACY_REPOSITORY] as $repository) {
+            $release = self::release_from($repository);
+            if ($release !== null) { set_transient(self::CACHE_KEY, $release, self::CACHE_TTL); return $release; }
+        }
+        return null;
+    }
+
+    private static function release_from(string $repository): ?array {
+        $response = wp_remote_get('https://api.github.com/repos/'.$repository.'/releases/latest',['timeout'=>10,'redirection'=>2,'headers'=>['Accept'=>'application/vnd.github+json','X-GitHub-Api-Version'=>'2022-11-28','User-Agent'=>'Harika-Connector/'.CCF_SITES_ADS_PLUGIN_VERSION]]);
         if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) return null;
         $payload = json_decode(wp_remote_retrieve_body($response), true); if (!is_array($payload) || !empty($payload['draft']) || !empty($payload['prerelease'])) return null;
         $tag = isset($payload['tag_name']) ? (string)$payload['tag_name'] : ''; $version = preg_replace('/^(?:wordpress-)?v/i','',$tag);
         if (!is_string($version) || !preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/',$version)) return null;
-        $release_url = isset($payload['html_url']) ? esc_url_raw((string)$payload['html_url']) : ''; $release_prefix='https://github.com/'.self::REPOSITORY.'/releases/';
-        if ($release_url==='' || strpos($release_url,$release_prefix)!==0) return null;
-        $package=''; foreach (($payload['assets']??[]) as $asset) { if (!is_array($asset)||($asset['name']??'')!==self::ASSET) continue; $candidate=esc_url_raw((string)($asset['browser_download_url']??'')); if (strpos($candidate,$release_prefix.'download/')===0 && substr($candidate,-strlen('/'.self::ASSET))==='/'.self::ASSET){$package=$candidate;break;} }
-        if ($package==='') return null;
-        $release=['version'=>$version,'url'=>$release_url,'package'=>$package,'tested'=>'7.1','notes'=>isset($payload['body'])&&is_string($payload['body'])?substr($payload['body'],0,8000):'Aktualisierung des CCF Sites & Ads Connectors.']; set_transient(self::CACHE_KEY,$release,self::CACHE_TTL); return $release;
+        $release_url = isset($payload['html_url']) ? esc_url_raw((string)$payload['html_url']) : '';
+        $package=''; foreach (($payload['assets']??[]) as $asset) { if (!is_array($asset)||($asset['name']??'')!==self::ASSET) continue; $candidate=esc_url_raw((string)($asset['browser_download_url']??'')); if ($candidate!==''){$package=$candidate;break;} }
+        $matched = self::matching_repository($release_url, $package);
+        if ($matched === null) return null;
+        return ['repository'=>$matched,'version'=>$version,'url'=>$release_url,'package'=>$package,'tested'=>'7.1','notes'=>isset($payload['body'])&&is_string($payload['body'])?substr($payload['body'],0,8000):'Aktualisierung des Harika Connectors.'];
+    }
+
+    private static function is_our_update_uri(string $uri): bool {
+        return $uri === 'https://github.com/' . self::REPOSITORY || $uri === 'https://github.com/' . self::LEGACY_REPOSITORY;
+    }
+
+    private static function matching_repository(string $release_url, string $package): ?string {
+        foreach ([self::REPOSITORY, self::LEGACY_REPOSITORY] as $repository) {
+            $prefix = 'https://github.com/' . $repository . '/releases/';
+            if ($release_url !== '' && strpos($release_url, $prefix) === 0 && strpos($package, $prefix . 'download/') === 0 && substr($package, -strlen('/' . self::ASSET)) === '/' . self::ASSET) return $repository;
+        }
+        return null;
     }
 }
 
