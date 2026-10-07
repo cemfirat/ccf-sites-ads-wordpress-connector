@@ -2,7 +2,7 @@
 Contributors: cemfirat
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 1.3.10
+Stable tag: 1.3.11
 License: Proprietary / private project
 
 Secure WordPress control, content administration and conversion connector for Harika.
@@ -49,6 +49,10 @@ The site token is server-side only. Browser requests use a short-lived same-orig
 Content-administration calls use the same signed server-to-server control boundary. Media import is limited to public HTTPS image sources and blocks private/reserved destinations, unsupported MIME types and files larger than 10 MB. Published content cannot be modified or trashed through the direct draft-first endpoints.
 
 == Changelog ==
+
+= 1.3.11 =
+* Publish release tags as harika-wordpress-connector-v<version>.
+* Keep recognizing the existing wordpress-v<version> tags.
 
 = 1.3.10 =
 * Rename the connector to Harika Connector in WordPress admin, status and update details.

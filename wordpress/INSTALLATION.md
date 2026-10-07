@@ -17,7 +17,7 @@ sh scripts/package-wordpress.sh
 
 Expected output: `dist/ccf-sites-ads-connector.zip`.
 
-Stable releases are published under a `wordpress-v*` tag. WordPress discovers
+Stable releases are published under a `harika-wordpress-connector-v*` tag. Older `wordpress-v*` tags remain valid. WordPress discovers
 those releases automatically and accepts only the canonical
 `ccf-sites-ads-connector.zip` asset from this repository.
 
