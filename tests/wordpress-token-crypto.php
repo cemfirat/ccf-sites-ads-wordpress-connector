@@ -14,7 +14,7 @@ function esc_url_raw(string $value): string { return filter_var($value, FILTER_V
 function wp_parse_url(string $value, int $component = -1) { return parse_url($value, $component); }
 function add_settings_error(...$args): void {}
 
-require __DIR__ . '/../wordpress/ccf-google-ads-site-connector.php';
+require __DIR__ . '/../wordpress/harika-wordpress-connector.php';
 
 $reflection = new ReflectionClass(CCF_Google_Ads_Site_Connector::class);
 $encrypt = $reflection->getMethod('encrypt_token');

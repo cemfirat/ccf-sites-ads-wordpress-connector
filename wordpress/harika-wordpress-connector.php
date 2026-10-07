@@ -15,7 +15,7 @@ defined('ABSPATH') || exit;
 define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.11');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
-require_once __DIR__ . '/ccf-site-connector-runtime.inc';
+require_once __DIR__ . '/harika-connector-runtime.inc';
 
 if (function_exists('remove_filter')) {
     remove_filter('pre_set_site_transient_update_plugins', [CCF_Google_Ads_Site_Connector::class, 'check_for_update']);

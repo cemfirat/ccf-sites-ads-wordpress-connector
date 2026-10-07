@@ -1,6 +1,6 @@
 # WordPress adapter
 
-This directory contains the server-side WordPress adapter for `ccf-google-ads-site-connector`.
+This directory contains the server-side WordPress adapter for Harika Connector. The source file is `harika-wordpress-connector.php`. The installable package keeps the existing WordPress plugin file `ccf-google-ads-site-connector.php`, so an installed site updates in place.
 
 ## Why server-side forwarding
 
@@ -23,7 +23,7 @@ Copy the complete `wordpress` directory into a plugin folder such as:
 
 `wp-content/plugins/ccf-google-ads-site-connector/`
 
-The resulting plugin file must be:
+The resulting plugin file must stay:
 
 `wp-content/plugins/ccf-google-ads-site-connector/ccf-google-ads-site-connector.php`
 

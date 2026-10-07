@@ -11,7 +11,7 @@ Build the validated installable ZIP with:
 npm ci
 npm run check
 node --check wordpress/assets/ccf-tracking.js
-php -l wordpress/ccf-google-ads-site-connector.php
+php -l wordpress/harika-wordpress-connector.php
 sh scripts/package-wordpress.sh
 ```
 
