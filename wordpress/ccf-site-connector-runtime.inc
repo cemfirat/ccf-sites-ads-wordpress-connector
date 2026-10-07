@@ -105,8 +105,8 @@ final class CCF_Google_Ads_Site_Connector {
             return null;
         }
         $tag = isset($payload['tag_name']) ? (string) $payload['tag_name'] : '';
-        $version = preg_replace('/^(?:wordpress-)?v/i', '', $tag);
-        if (!is_string($version) || !preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/', $version)) {
+        $version = self::version_from_tag($tag);
+        if ($version === null) {
             return null;
         }
         $release_url = isset($payload['html_url']) ? esc_url_raw((string) $payload['html_url']) : '';
@@ -146,6 +146,17 @@ final class CCF_Google_Ads_Site_Connector {
         ];
         set_transient(self::RELEASE_CACHE_KEY, $release, 6 * 60 * 60);
         return $release;
+    }
+
+    private static function version_from_tag(string $tag): ?string {
+        foreach (['harika-wordpress-connector-v', 'wordpress-v', 'v'] as $prefix) {
+            if (stripos($tag, $prefix) !== 0) {
+                continue;
+            }
+            $version = substr($tag, strlen($prefix));
+            return preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/', $version) ? $version : null;
+        }
+        return null;
     }
 
     public static function register_admin_page(): void {

@@ -2,6 +2,11 @@
 
 All notable changes to the Harika Connector are documented here.
 
+## 1.3.11 - 2026-10-07
+
+- Publish releases as `harika-wordpress-connector-v<version>`.
+- Keep accepting the existing `wordpress-v<version>` tags, including `wordpress-v1.3.10`.
+
 ## 1.3.10 - 2026-10-07
 
 - Rename the installable connector to Harika Connector.

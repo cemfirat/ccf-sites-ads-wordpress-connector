@@ -33,7 +33,7 @@ jobs:
             echo "Invalid plugin version: $VERSION" >&2
             exit 1
           fi
-          TAG="wordpress-v$VERSION"
+          TAG="harika-wordpress-connector-v$VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then

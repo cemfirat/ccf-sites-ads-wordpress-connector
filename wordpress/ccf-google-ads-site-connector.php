@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Harika Connector
  * Description: Secure WordPress control, content administration and conversion connector for Harika.
- * Version: 1.3.10
+ * Version: 1.3.11
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Cem Firat
@@ -12,7 +12,7 @@
 
 defined('ABSPATH') || exit;
 
-define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.10');
+define('CCF_SITES_ADS_PLUGIN_VERSION', '1.3.11');
 define('CCF_SITES_ADS_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/ccf-site-connector-runtime.inc';
@@ -100,13 +100,22 @@ final class CCF_Sites_Ads_Plugin_Updater {
         $response = wp_remote_get('https://api.github.com/repos/'.$repository.'/releases/latest',['timeout'=>10,'redirection'=>2,'headers'=>['Accept'=>'application/vnd.github+json','X-GitHub-Api-Version'=>'2022-11-28','User-Agent'=>'Harika-Connector/'.CCF_SITES_ADS_PLUGIN_VERSION]]);
         if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) return null;
         $payload = json_decode(wp_remote_retrieve_body($response), true); if (!is_array($payload) || !empty($payload['draft']) || !empty($payload['prerelease'])) return null;
-        $tag = isset($payload['tag_name']) ? (string)$payload['tag_name'] : ''; $version = preg_replace('/^(?:wordpress-)?v/i','',$tag);
-        if (!is_string($version) || !preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/',$version)) return null;
+        $tag = isset($payload['tag_name']) ? (string)$payload['tag_name'] : ''; $version = self::version_from_tag($tag);
+        if ($version === null) return null;
         $release_url = isset($payload['html_url']) ? esc_url_raw((string)$payload['html_url']) : '';
         $package=''; foreach (($payload['assets']??[]) as $asset) { if (!is_array($asset)||($asset['name']??'')!==self::ASSET) continue; $candidate=esc_url_raw((string)($asset['browser_download_url']??'')); if ($candidate!==''){$package=$candidate;break;} }
         $matched = self::matching_repository($release_url, $package);
         if ($matched === null) return null;
         return ['repository'=>$matched,'version'=>$version,'url'=>$release_url,'package'=>$package,'tested'=>'7.1','notes'=>isset($payload['body'])&&is_string($payload['body'])?substr($payload['body'],0,8000):'Aktualisierung des Harika Connectors.'];
+    }
+
+    private static function version_from_tag(string $tag): ?string {
+        foreach (['harika-wordpress-connector-v', 'wordpress-v', 'v'] as $prefix) {
+            if (stripos($tag, $prefix) !== 0) continue;
+            $version = substr($tag, strlen($prefix));
+            return preg_match('/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/', $version) ? $version : null;
+        }
+        return null;
     }
 
     private static function is_our_update_uri(string $uri): bool {
