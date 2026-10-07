@@ -2,7 +2,7 @@
 Contributors: cemfirat
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 1.3.8
+Stable tag: 1.3.9
 License: Proprietary / private project
 
 Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
@@ -49,6 +49,9 @@ The site token is server-side only. Browser requests use a short-lived same-orig
 Content-administration calls use the same signed server-to-server control boundary. Media import is limited to public HTTPS image sources and blocks private/reserved destinations, unsupported MIME types and files larger than 10 MB. Published content cannot be modified or trashed through the direct draft-first endpoints.
 
 == Changelog ==
+
+= 1.3.9 =
+* Publish the installable connector so WordPress reports the 6.0 minimum and the package text domain that were added after the 1.3.8 release.
 
 = 1.3.8 =
 * Add read-only performance inventory for database size, autoloaded options, revisions, transients, cron, Action Scheduler and persistent object cache.
