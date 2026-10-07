@@ -18,7 +18,7 @@ function remove_filter(string $name, $callback, int $priority = 10): bool {
     $GLOBALS['ccf_filters'][$name] = array_values(array_filter($GLOBALS['ccf_filters'][$name], static function ($entry) use ($callback, $priority) { return !($entry[0] === $callback && $entry[1] === $priority); }));
     return count($GLOBALS['ccf_filters'][$name]) < $before;
 }
-function plugin_basename(string $file): string { return 'ccf-google-ads-site-connector/' . basename($file); }
+function plugin_basename(string $file): string { return 'ccf-google-ads-site-connector/ccf-google-ads-site-connector.php'; }
 function get_option(string $name, $default = false) { return $default; }
 function get_transient(string $name) { return $GLOBALS['ccf_transients'][$name] ?? false; }
 function set_transient(string $name, $value, int $ttl): bool { $GLOBALS['ccf_transients'][$name] = $value; return $ttl > 0; }
@@ -41,7 +41,7 @@ function wp_remote_get(string $url, array $options): array {
     return ['response' => ['code' => 200], 'body' => json_encode(['tag_name' => $tag, 'html_url' => 'https://github.com/' . $matched . '/releases/tag/' . $tag, 'draft' => false, 'prerelease' => false, 'target_commitish' => 'main', 'body' => 'Updater test release', 'assets' => [['name' => 'ccf-sites-ads-connector.zip', 'browser_download_url' => 'https://github.com/' . $matched . '/releases/download/' . $tag . '/ccf-sites-ads-connector.zip']]], JSON_THROW_ON_ERROR)];
 }
 
-require __DIR__ . '/../wordpress/ccf-google-ads-site-connector.php';
+require __DIR__ . '/../wordpress/harika-wordpress-connector.php';
 if (!defined('CCF_SITES_ADS_PLUGIN_VERSION') || CCF_SITES_ADS_PLUGIN_VERSION !== '1.3.11') throw new RuntimeException('Plugin version constant is not v1.3.11.');
 $nativeFilters = $GLOBALS['ccf_filters']['update_plugins_github.com'] ?? [];
 if (count($nativeFilters) !== 1 || $nativeFilters[0][2] !== 4) throw new RuntimeException('Native Update URI hook is not registered correctly.');

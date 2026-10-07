@@ -200,7 +200,7 @@ function get_permalink($post_id): string { return 'https://customer.example/serv
 function update_option($name, $value, $autoload = null): bool { return true; }
 function wp_generate_uuid4(): string { return '12345678-1234-1234-1234-123456789abc'; }
 
-require __DIR__ . '/../wordpress/ccf-google-ads-site-connector.php';
+require __DIR__ . '/../wordpress/harika-wordpress-connector.php';
 
 $timestamp = time();
 $nonce = 'nonce-control-test-12345';
