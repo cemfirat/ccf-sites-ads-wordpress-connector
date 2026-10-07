@@ -3,7 +3,7 @@
 defined('ABSPATH') || exit;
 
 /**
- * Authenticated WordPress control surface used by CCF Sites & Ads.
+ * Authenticated WordPress control surface used by Harika.
  *
  * All mutations are previewed, bound to an approval/idempotency key, recorded
  * with before/after snapshots and reversible while the target has not drifted.
@@ -137,7 +137,7 @@ final class CCF_Sites_Control {
     public static function status() {
         return self::response([
             'status' => 'ready',
-            'plugin' => ['name' => 'CCF Sites & Ads Connector', 'version' => defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.3.0'],
+            'plugin' => ['name' => 'Harika Connector', 'version' => defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.3.0'],
             'capabilities' => [
                 'wordpress.inventory.read',
                 'wordpress.content.read',

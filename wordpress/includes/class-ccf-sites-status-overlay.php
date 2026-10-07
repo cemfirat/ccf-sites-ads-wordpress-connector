@@ -26,7 +26,7 @@ final class CCF_Sites_Status_Overlay {
         }
         $data = $envelope['data'];
         $data['plugin'] = [
-            'name' => 'CCF Sites & Ads Connector',
+            'name' => 'Harika Connector',
             'version' => defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.2.0',
         ];
         $capabilities = isset($data['capabilities']) && is_array($data['capabilities']) ? $data['capabilities'] : [];

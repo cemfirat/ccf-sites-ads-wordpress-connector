@@ -1,15 +1,15 @@
-=== CCF Sites & Ads Connector ===
+=== Harika Connector ===
 Contributors: cemfirat
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 1.3.9
+Stable tag: 1.3.10
 License: Proprietary / private project
 
-Secure WordPress control, content administration and conversion connector for CCF Sites & Ads.
+Secure WordPress control, content administration and conversion connector for Harika.
 
 == Description ==
 
-CCF Sites & Ads Connector is the universal WordPress-side connector for websites managed through CCF Sites & Ads. The same plugin can be installed on different customer websites; customer separation and Google provider credentials remain in the central CCF platform.
+Harika Connector is the universal WordPress-side connector for websites managed through Harika. The same plugin can be installed on different customer websites; customer separation and Google provider credentials remain in the central Harika platform.
 
 It supports authenticated inventory/content reads and controlled WordPress, Rank Math and YOOtheme changes with preview, approval binding, verification and rollback.
 
@@ -17,7 +17,7 @@ Version 1.2 adds a draft-first content administration surface for preparing new 
 
 Direct publication is intentionally not available through the draft-first surface. Existing published content continues to use the preview/approval/apply workflow.
 
-Google Ads, GA4 and Search Console credentials are never stored in this WordPress plugin. Those provider connections are managed centrally by CCF Sites & Ads.
+Google Ads, GA4 and Search Console credentials are never stored in this WordPress plugin. Those provider connections are managed centrally by Harika.
 
 Tracking is disabled until advertising consent is explicitly provided by the website consent integration.
 
@@ -28,13 +28,13 @@ Raw form contents, names, email addresses, phone numbers, message bodies and upl
 == Installation ==
 
 1. Install the generated ccf-sites-ads-connector.zip package on the customer WordPress website.
-2. Configure the plugin under Settings > CCF Sites & Ads or supply the documented server-side constants.
-3. Activate CCF Sites & Ads Connector.
-4. Pair the site with the corresponding customer workspace in CCF Sites & Ads.
+2. Configure the plugin under Settings > Harika Connector or supply the documented server-side constants.
+3. Activate Harika Connector.
+4. Pair the site with the corresponding customer workspace in Harika.
 5. Verify the YOOtheme consent mapping or connect another consent manager to window.CCFGoogleAds.setConsent().
 6. Mark only approved forms for form-submit tracking.
 
-The same plugin package is used for every customer website. Google Ads, GA4 and Search Console are selected centrally in the customer's CCF workspace and do not require additional WordPress plugins.
+The same plugin package is used for every customer website. Google Ads, GA4 and Search Console are selected centrally in the customer's Harika workspace and do not require additional WordPress plugins.
 
 See README.md in the project repository for the complete configuration and production checklist.
 
@@ -49,6 +49,10 @@ The site token is server-side only. Browser requests use a short-lived same-orig
 Content-administration calls use the same signed server-to-server control boundary. Media import is limited to public HTTPS image sources and blocks private/reserved destinations, unsupported MIME types and files larger than 10 MB. Published content cannot be modified or trashed through the direct draft-first endpoints.
 
 == Changelog ==
+
+= 1.3.10 =
+* Rename the connector to Harika Connector in WordPress admin, status and update details.
+* Follow releases from the Harika repository while still accepting the previous repository URL.
 
 = 1.3.9 =
 * Publish the installable connector so WordPress reports the 6.0 minimum and the package text domain that were added after the 1.3.8 release.

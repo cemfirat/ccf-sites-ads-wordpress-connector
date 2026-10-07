@@ -7,9 +7,9 @@
   "plugin": {
     "root": "wordpress",
     "slug": "ccf-google-ads-site-connector",
-    "name": "CCF Sites & Ads Connector",
+    "name": "Harika Connector",
     "main_file": "ccf-google-ads-site-connector.php",
-    "version": "1.3.9",
+    "version": "1.3.10",
     "text_domain": "ccf-google-ads-site-connector",
     "minimum_wordpress": "6.0",
     "minimum_php": "7.4",
@@ -21,7 +21,7 @@
   "distribution": {
     "channel": "github-releases",
     "updates": "github-release-updater",
-    "update_uri": "https://github.com/cemfirat/ccf-sites-ads-wordpress-connector"
+    "update_uri": "https://github.com/cemfirat/harika-wordpress-connector"
   },
   "features": {
     "block_plugin": false,

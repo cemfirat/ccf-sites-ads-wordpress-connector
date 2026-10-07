@@ -27,7 +27,7 @@ The resulting plugin file must be:
 
 `wp-content/plugins/ccf-google-ads-site-connector/ccf-google-ads-site-connector.php`
 
-Activate **CCF Sites & Ads Connector** in WordPress.
+Activate **Harika Connector** in WordPress.
 
 ## Updates
 
@@ -54,7 +54,7 @@ define('CCF_GADS_ENVIRONMENT', 'production');
 `CCF_GADS_SITE_TOKEN` must be a strong secret of at least 32 characters. Never commit the real value to Git and never print it into HTML or JavaScript.
 
 When protected server-file access is unavailable, an administrator can instead
-configure the connector under **Settings → CCF Sites & Ads**. In that mode the
+configure the connector under **Settings → Harika Connector**. In that mode the
 token is encrypted with AES-256-GCM using a key derived from the WordPress auth
 salt. Only ciphertext is stored in the WordPress options table, and the token
 field is never prefilled or sent back to the browser. Rotating WordPress auth

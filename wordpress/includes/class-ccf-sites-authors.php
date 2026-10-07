@@ -3,7 +3,7 @@
 defined('ABSPATH') || exit;
 
 /**
- * Safe editorial author support for CCF Sites & Ads.
+ * Safe editorial author support for Harika.
  *
  * The connector exposes editorial identity data only. Profile changes are
  * restricted to the public display name. Role changes are restricted to the

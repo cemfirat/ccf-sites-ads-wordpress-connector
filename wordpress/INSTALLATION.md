@@ -39,7 +39,7 @@ define('CCF_GADS_ENVIRONMENT', 'production');
 into Git, browser JavaScript, page HTML, tickets or deployment documentation.
 
 If protected file access is unavailable, configure it under
-**Settings → CCF Sites & Ads**. The plugin encrypts the token with AES-256-GCM
+**Settings → Harika Connector**. The plugin encrypts the token with AES-256-GCM
 and a key derived from the WordPress auth salt before storing it. The token is
 never rendered back into the admin page.
 

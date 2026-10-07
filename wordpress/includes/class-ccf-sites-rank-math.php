@@ -3,7 +3,7 @@
 defined('ABSPATH') || exit;
 
 /**
- * Signed bridge from CCF Sites & Ads to Rank Math's native WordPress Abilities.
+ * Signed bridge from Harika to Rank Math's native WordPress Abilities.
  *
  * Rank Math 1.0.272+ exposes its MCP surface through the WordPress Abilities API.
  * This bridge deliberately discovers those abilities dynamically so future
