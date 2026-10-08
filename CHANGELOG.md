@@ -2,6 +2,12 @@
 
 All notable changes to the Harika Connector are documented here.
 
+## 1.3.14 - 2026-10-08
+
+- Explain on the WordPress settings screen that the connector values belong to the website in Harika, not to the customer master data.
+- Show the environment as Produktion, Staging, or Entwicklung, matching the website environment in Harika.
+- Say when a value comes from server configuration instead of the saved field.
+
 ## 1.3.13 - 2026-10-08
 
 - Name the release package `harika-wordpress-connector-v<version>.zip`, matching the tag.

@@ -248,9 +248,26 @@ final class Harika_Connector {
 
         $settings = self::settings();
         $configured = self::site_token() !== '';
+        $endpoint_locked = defined('CCF_GADS_CONTROL_ENDPOINT');
+        $client_locked = defined('CCF_GADS_CLIENT_ID');
+        $site_locked = defined('CCF_GADS_SITE_ID');
+        $environment_locked = defined('CCF_GADS_ENVIRONMENT');
+        $token_locked = defined('CCF_GADS_SITE_TOKEN');
+        $endpoint = $endpoint_locked ? (string) CCF_GADS_CONTROL_ENDPOINT : (isset($settings['endpoint']) ? (string) $settings['endpoint'] : '');
+        $client_id = $client_locked ? (string) CCF_GADS_CLIENT_ID : (isset($settings['client_id']) ? (string) $settings['client_id'] : '');
+        $site_id = $site_locked ? (string) CCF_GADS_SITE_ID : (isset($settings['site_id']) ? (string) $settings['site_id'] : '');
+        $environment = self::environment();
+        $environments = [
+            'production' => 'Produktion',
+            'staging' => 'Staging',
+            'development' => 'Entwicklung',
+        ];
         ?>
         <div class="wrap">
             <h1>Harika Connector</h1>
+            <div class="notice notice-info inline">
+                <p>Diese Angaben gehören zur <strong>Website in Harika</strong>, nicht zu den Kundenstammdaten. Firmenname, Adresse und Kontakt sind keine Zugangsdaten. Bei der Website steht die Umgebung, zum Beispiel Produktion. Control-Endpunkt, Client-ID, Site-ID und Site-Token müssen zu genau dieser Website gehören. WordPress liest sie nicht aus Harika aus. Was hier schon steht, ist in WordPress gespeichert.</p>
+            </div>
             <p>Der Site-Token wird mit den WordPress-Server-Salts verschlüsselt gespeichert und niemals im Browser ausgegeben.</p>
             <?php settings_errors(self::OPTION_NAME); ?>
             <form action="options.php" method="post" autocomplete="off">
@@ -258,31 +275,44 @@ final class Harika_Connector {
                 <table class="form-table" role="presentation">
                     <tr>
                         <th scope="row"><label for="ccf-gads-endpoint">Control-Endpunkt</label></th>
-                        <td><input class="regular-text code" id="ccf-gads-endpoint" name="<?php echo esc_attr(self::OPTION_NAME); ?>[endpoint]" type="url" required value="<?php echo esc_attr(isset($settings['endpoint']) ? (string) $settings['endpoint'] : ''); ?>"></td>
+                        <td>
+                            <input class="regular-text code" id="ccf-gads-endpoint" name="<?php echo esc_attr(self::OPTION_NAME); ?>[endpoint]" type="url" required value="<?php echo esc_attr($endpoint); ?>" <?php echo $endpoint_locked ? 'readonly' : ''; ?>>
+                            <p class="description">Adresse des Harika-Dienstes für diese Website. Sie wird nicht automatisch eingetragen und steht nicht in den Kundenstammdaten. <?php echo $endpoint_locked ? 'Dieser Wert kommt aus der Server-Konfiguration und gilt statt des gespeicherten Felds.' : 'Eine schon eingetragene Adresse ist in WordPress gespeichert.'; ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="ccf-gads-client">Client-ID</label></th>
-                        <td><input class="regular-text code" id="ccf-gads-client" name="<?php echo esc_attr(self::OPTION_NAME); ?>[client_id]" type="text" required value="<?php echo esc_attr(isset($settings['client_id']) ? (string) $settings['client_id'] : ''); ?>"></td>
+                        <td>
+                            <input class="regular-text code" id="ccf-gads-client" name="<?php echo esc_attr(self::OPTION_NAME); ?>[client_id]" type="text" required value="<?php echo esc_attr($client_id); ?>" <?php echo $client_locked ? 'readonly' : ''; ?>>
+                            <p class="description">Technischer Kundenschlüssel dieser Verbindung. Nicht der Firmenname, nicht die Geschäftsbezeichnung und kein Feld aus den Kundenstammdaten. <?php echo $client_locked ? 'Dieser Wert kommt aus der Server-Konfiguration und gilt statt des gespeicherten Felds.' : 'Er gehört zur Website, nicht zum Kundenstamm.'; ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="ccf-gads-site">Site-ID</label></th>
-                        <td><input class="regular-text code" id="ccf-gads-site" name="<?php echo esc_attr(self::OPTION_NAME); ?>[site_id]" type="text" required value="<?php echo esc_attr(isset($settings['site_id']) ? (string) $settings['site_id'] : ''); ?>"></td>
+                        <td>
+                            <input class="regular-text code" id="ccf-gads-site" name="<?php echo esc_attr(self::OPTION_NAME); ?>[site_id]" type="text" required value="<?php echo esc_attr($site_id); ?>" <?php echo $site_locked ? 'readonly' : ''; ?>>
+                            <p class="description">Technischer Schlüssel genau dieser Website, nicht die Domain. <?php echo $site_locked ? 'Dieser Wert kommt aus der Server-Konfiguration und gilt statt des gespeicherten Felds.' : 'Er gehört zur Website, nicht zum Kundenstamm.'; ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="ccf-gads-environment">Umgebung</label></th>
                         <td>
-                            <select id="ccf-gads-environment" name="<?php echo esc_attr(self::OPTION_NAME); ?>[environment]">
-                                <?php foreach (['development', 'staging', 'production'] as $value) : ?>
-                                    <option value="<?php echo esc_attr($value); ?>" <?php selected(isset($settings['environment']) ? (string) $settings['environment'] : 'production', $value); ?>><?php echo esc_html($value); ?></option>
+                            <select id="ccf-gads-environment" name="<?php echo esc_attr(self::OPTION_NAME); ?>[environment]" <?php echo $environment_locked ? 'disabled' : ''; ?>>
+                                <?php foreach ($environments as $value => $label) : ?>
+                                    <option value="<?php echo esc_attr($value); ?>" <?php selected($environment, $value); ?>><?php echo esc_html($label); ?></option>
                                 <?php endforeach; ?>
                             </select>
+                            <?php if ($environment_locked) : ?>
+                                <input type="hidden" name="<?php echo esc_attr(self::OPTION_NAME); ?>[environment]" value="<?php echo esc_attr($environment); ?>">
+                            <?php endif; ?>
+                            <p class="description">Dieselbe Umgebung wie bei der Website in Harika. Produktion dort bleibt hier Produktion. <?php echo $environment_locked ? 'Dieser Wert kommt aus der Server-Konfiguration.' : 'WordPress übernimmt sie nicht von selbst.'; ?></p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="ccf-gads-token">Site-Token</label></th>
                         <td>
-                            <input class="regular-text code" id="ccf-gads-token" name="<?php echo esc_attr(self::OPTION_NAME); ?>[site_token]" type="password" minlength="32" value="" autocomplete="new-password">
-                            <p class="description">Status: <strong><?php echo $configured ? 'konfiguriert' : 'nicht konfiguriert'; ?></strong>. Leer lassen, um den bestehenden Token unverändert zu behalten.</p>
+                            <input class="regular-text code" id="ccf-gads-token" name="<?php echo esc_attr(self::OPTION_NAME); ?>[site_token]" type="password" minlength="32" value="" autocomplete="new-password" <?php echo $token_locked ? 'disabled' : ''; ?>>
+                            <p class="description">Status: <strong><?php echo $configured ? 'konfiguriert' : 'nicht konfiguriert'; ?></strong>. <?php echo $token_locked ? 'Der Token kommt aus der Server-Konfiguration und wird hier nicht angezeigt.' : 'Geheimnis dieser Website aus Harika. Einmal eintragen, danach leer lassen. Der gespeicherte Token bleibt dann unverändert.'; ?></p>
                         </td>
                     </tr>
                 </table>
