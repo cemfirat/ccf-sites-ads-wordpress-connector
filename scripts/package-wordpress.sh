@@ -4,10 +4,16 @@ set -eu
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 BUILD_DIR="$ROOT_DIR/dist/wordpress-package"
 PLUGIN_DIR="$BUILD_DIR/ccf-google-ads-site-connector"
-ZIP_PATH="$ROOT_DIR/dist/harika-wordpress-connector.zip"
+VERSION="$(sed -n 's/^ \* Version: \([0-9][0-9.]*\).*$/\1/p' "$ROOT_DIR/wordpress/harika-wordpress-connector.php" | head -n 1)"
+if [ -z "$VERSION" ]; then
+  echo "Plugin version missing from wordpress/harika-wordpress-connector.php" >&2
+  exit 1
+fi
+ZIP_PATH="$ROOT_DIR/dist/harika-wordpress-connector-v$VERSION.zip"
+STABLE_ZIP_PATH="$ROOT_DIR/dist/harika-wordpress-connector.zip"
 LEGACY_ZIP_PATH="$ROOT_DIR/dist/ccf-sites-ads-connector.zip"
 
-rm -rf "$BUILD_DIR" "$ZIP_PATH" "$LEGACY_ZIP_PATH"
+rm -rf "$BUILD_DIR" "$ZIP_PATH" "$STABLE_ZIP_PATH" "$LEGACY_ZIP_PATH"
 mkdir -p "$PLUGIN_DIR/assets" "$PLUGIN_DIR/includes"
 
 cp "$ROOT_DIR/wordpress/harika-wordpress-connector.php" "$PLUGIN_DIR/ccf-google-ads-site-connector.php"
@@ -36,6 +42,8 @@ for file in "$PLUGIN_DIR"/*.php "$PLUGIN_DIR"/*.inc "$PLUGIN_DIR"/includes/*.php
   php -l "$file"
 done
 
+cp "$ZIP_PATH" "$STABLE_ZIP_PATH"
 cp "$ZIP_PATH" "$LEGACY_ZIP_PATH"
 echo "$ZIP_PATH"
+echo "$STABLE_ZIP_PATH"
 echo "$LEGACY_ZIP_PATH"

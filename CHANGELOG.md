@@ -2,6 +2,12 @@
 
 All notable changes to the Harika Connector are documented here.
 
+## 1.3.13 - 2026-10-08
+
+- Name the release package `harika-wordpress-connector-v<version>.zip`, matching the tag.
+- Keep attaching `harika-wordpress-connector.zip` and `ccf-sites-ads-connector.zip` so connectors already installed can download this release.
+- Prefer the versioned package when a release contains more than one filename.
+
 ## 1.3.12 - 2026-10-08
 
 - Rename the PHP classes to `Harika_*` and publish `harika-wordpress-connector.zip`.

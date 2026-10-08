@@ -9,7 +9,7 @@
     "slug": "ccf-google-ads-site-connector",
     "name": "Harika Connector",
     "main_file": "harika-wordpress-connector.php",
-    "version": "1.3.12",
+    "version": "1.3.13",
     "text_domain": "ccf-google-ads-site-connector",
     "minimum_wordpress": "6.0",
     "minimum_php": "7.4",

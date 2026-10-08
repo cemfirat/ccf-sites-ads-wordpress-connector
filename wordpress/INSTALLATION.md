@@ -15,11 +15,11 @@ php -l wordpress/harika-wordpress-connector.php
 sh scripts/package-wordpress.sh
 ```
 
-Expected output: `dist/harika-wordpress-connector.zip` and the same bytes as `dist/ccf-sites-ads-connector.zip`.
+Expected output: `dist/harika-wordpress-connector-v<version>.zip`, plus the same bytes as `dist/harika-wordpress-connector.zip` and `dist/ccf-sites-ads-connector.zip`.
 
 Stable releases are published under a `harika-wordpress-connector-v*` tag. Older `wordpress-v*` tags remain valid. WordPress discovers
-those releases automatically and accepts `harika-wordpress-connector.zip`.
-It still accepts `ccf-sites-ads-connector.zip` from this repository.
+those releases automatically and prefers `harika-wordpress-connector-v<version>.zip`.
+It still accepts `harika-wordpress-connector.zip` and `ccf-sites-ads-connector.zip` from this repository.
 
 ## Server-side configuration after explicit approval
 

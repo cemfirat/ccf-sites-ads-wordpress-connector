@@ -38,7 +38,7 @@ Rank Math übernimmt für Article-/BlogPosting-Schema standardmäßig den primä
 
 ## Installation
 
-1. [Aktuelles Plugin-ZIP herunterladen](https://github.com/cemfirat/harika-wordpress-connector/releases/latest/download/harika-wordpress-connector.zip). Dasselbe Paket liegt zusätzlich als `ccf-sites-ads-connector.zip` bei, damit bereits installierte Connectoren weiter aktualisieren.
+1. [Aktuelles Plugin-ZIP herunterladen](https://github.com/cemfirat/harika-wordpress-connector/releases/latest/download/harika-wordpress-connector-v1.3.13.zip). Dieselbe Datei liegt zusätzlich als `harika-wordpress-connector.zip` und `ccf-sites-ads-connector.zip` bei, damit bereits installierte Connectoren weiter aktualisieren.
 2. In WordPress unter **Plugins → Installieren → Plugin hochladen** auswählen.
 3. Aktivieren und unter **Einstellungen → Harika Connector** mit dem zugehörigen Kunden-Workspace verbinden.
 4. Im zentralen Harika-Workspace die passende Website und – unabhängig davon – Google Ads, GA4 und Search Console zuordnen.
