@@ -18,9 +18,9 @@ jobs:
       - name: Check browser bridge syntax
         run: node --check wordpress/assets/harika-tracking.js
       - name: Check PHP syntax
-        run: php -l wordpress/harika-wordpress-connector.php && php -l wordpress/harika-connector-runtime.inc && php -l wordpress/includes/class-harika-control.php && php -l wordpress/includes/class-harika-content-admin.php && php -l wordpress/includes/class-harika-draft-seo.php && php -l wordpress/includes/class-harika-status-overlay.php && php -l wordpress/includes/class-harika-authors.php
+        run: php -l wordpress/harika-wordpress-connector.php && php -l wordpress/harika-connector-runtime.inc && php -l wordpress/includes/class-harika-control.php && php -l wordpress/includes/class-harika-content-admin.php && php -l wordpress/includes/class-harika-draft-seo.php && php -l wordpress/includes/class-harika-rank-math.php && php -l wordpress/includes/class-harika-status-overlay.php && php -l wordpress/includes/class-harika-authors.php
       - name: Run connector tests
-        run: node --test tests/wordpress-bridge.test.mjs && php tests/wordpress-token-crypto.php && php tests/wordpress-control.php && php tests/wordpress-content-admin.php && php tests/wordpress-authors.php && php tests/wordpress-updater.php
+        run: node --test tests/wordpress-bridge.test.mjs && php tests/wordpress-token-crypto.php && php tests/wordpress-control.php && php tests/wordpress-content-admin.php && php tests/wordpress-authors.php && php tests/wordpress-rank-math.php && php tests/wordpress-updater.php
       - name: Build and verify ZIP
         run: sh scripts/package-wordpress.sh
       - name: Resolve release version
@@ -56,4 +56,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.version }}
-        run: gh release create "$TAG" dist/ccf-sites-ads-connector.zip --generate-notes --verify-tag --title "Harika Connector $VERSION"
+        run: gh release create "$TAG" dist/harika-wordpress-connector.zip dist/ccf-sites-ads-connector.zip --generate-notes --verify-tag --title "Harika Connector $VERSION"

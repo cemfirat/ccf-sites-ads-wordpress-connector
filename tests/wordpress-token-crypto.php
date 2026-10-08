@@ -16,7 +16,7 @@ function add_settings_error(...$args): void {}
 
 require __DIR__ . '/../wordpress/harika-wordpress-connector.php';
 
-$reflection = new ReflectionClass(CCF_Google_Ads_Site_Connector::class);
+$reflection = new ReflectionClass(Harika_Connector::class);
 $encrypt = $reflection->getMethod('encrypt_token');
 $decrypt = $reflection->getMethod('decrypt_token');
 
@@ -32,14 +32,14 @@ if ($decrypted !== $token) {
     throw new RuntimeException('Token decryption failed.');
 }
 
-$firstSanitized = CCF_Google_Ads_Site_Connector::sanitize_settings([
+$firstSanitized = Harika_Connector::sanitize_settings([
     'endpoint' => 'https://control.example.test',
     'client_id' => 'example-customer',
     'site_id' => 'example-site',
     'environment' => 'production',
     'site_token' => $token,
 ]);
-$secondSanitized = CCF_Google_Ads_Site_Connector::sanitize_settings($firstSanitized);
+$secondSanitized = Harika_Connector::sanitize_settings($firstSanitized);
 
 if (($secondSanitized['encrypted_token'] ?? '') !== ($firstSanitized['encrypted_token'] ?? '')) {
     throw new RuntimeException('A repeated WordPress sanitize pass discarded the encrypted token.');

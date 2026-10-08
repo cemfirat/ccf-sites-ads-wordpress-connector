@@ -6,11 +6,11 @@ defined('ABSPATH') || exit;
  * Low-risk content administration surface for Harika.
  *
  * Published content is deliberately not changed here. Existing published
- * content continues to use the preview/approval/apply path in CCF_Sites_Control.
+ * content continues to use the preview/approval/apply path in Harika_Control.
  * This surface is intended for creating and preparing drafts, taxonomies,
  * ACF data and media before publication.
  */
-final class CCF_Sites_Content_Admin {
+final class Harika_Content_Admin {
     private const REST_NAMESPACE = 'ccf-sites/v1';
     private const MAX_IMAGE_BYTES = 10485760;
     private const IDEMPOTENCY_TTL = 86400;
@@ -22,11 +22,11 @@ final class CCF_Sites_Content_Admin {
     public static function register_routes(): void {
         $read = [
             'methods' => 'GET',
-            'permission_callback' => [CCF_Sites_Control::class, 'authorize'],
+            'permission_callback' => [Harika_Control::class, 'authorize'],
         ];
         $write = [
             'methods' => 'POST',
-            'permission_callback' => [CCF_Sites_Control::class, 'authorize'],
+            'permission_callback' => [Harika_Control::class, 'authorize'],
         ];
 
         register_rest_route(self::REST_NAMESPACE, '/content-admin/status', $read + [

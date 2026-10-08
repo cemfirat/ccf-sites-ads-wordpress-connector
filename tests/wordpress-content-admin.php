@@ -54,7 +54,7 @@ class Test_Request implements ArrayAccess {
     public function offsetUnset($offset): void { unset($this->params[$offset]); }
 }
 
-class CCF_Sites_Control {
+class Harika_Control {
     public static function authorize($request) { return true; }
 }
 
@@ -100,7 +100,7 @@ $request = new Test_Request(json_encode([
     'status' => 'draft',
 ], JSON_THROW_ON_ERROR));
 
-$created = CCF_Sites_Content_Admin::create_content($request);
+$created = Harika_Content_Admin::create_content($request);
 if (!$created instanceof WP_REST_Response || $created->status !== 201) {
     throw new RuntimeException('Draft creation failed.');
 }
@@ -109,7 +109,7 @@ if (!is_array($content) || ($content['status'] ?? '') !== 'draft' || ($content['
     throw new RuntimeException('Created draft snapshot is invalid.');
 }
 
-$replayed = CCF_Sites_Content_Admin::create_content($request);
+$replayed = Harika_Content_Admin::create_content($request);
 if (!$replayed instanceof WP_REST_Response || ($replayed->data['data']['replayed'] ?? false) !== true) {
     throw new RuntimeException('Draft idempotency replay failed.');
 }
@@ -120,13 +120,13 @@ $publishRequest = new Test_Request(json_encode([
     'title' => 'Must not publish directly',
     'status' => 'publish',
 ], JSON_THROW_ON_ERROR));
-$publishResult = CCF_Sites_Content_Admin::create_content($publishRequest);
+$publishResult = Harika_Content_Admin::create_content($publishRequest);
 if (!$publishResult instanceof WP_Error || $publishResult->code !== 'ccf_content_status_forbidden') {
     throw new RuntimeException('Direct publishing was not blocked.');
 }
 
 $trashPublishedRequest = new Test_Request('', ['id' => 42]);
-$trashPublished = CCF_Sites_Content_Admin::trash_content($trashPublishedRequest);
+$trashPublished = Harika_Content_Admin::trash_content($trashPublishedRequest);
 if (!$trashPublished instanceof WP_Error || $trashPublished->code !== 'ccf_published_content_requires_approval') {
     throw new RuntimeException('Published content bypassed the approval gate.');
 }

@@ -2,7 +2,7 @@
 Contributors: cemfirat
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 1.3.11
+Stable tag: 1.3.12
 License: Proprietary / private project
 
 Secure WordPress control, content administration and conversion connector for Harika.
@@ -27,7 +27,7 @@ Raw form contents, names, email addresses, phone numbers, message bodies and upl
 
 == Installation ==
 
-1. Install the generated ccf-sites-ads-connector.zip package on the customer WordPress website.
+1. Install harika-wordpress-connector.zip on the customer WordPress website. The same bytes are also published as ccf-sites-ads-connector.zip so an already installed connector can update.
 2. Configure the plugin under Settings > Harika Connector or supply the documented server-side constants.
 3. Activate Harika Connector.
 4. Pair the site with the corresponding customer workspace in Harika.
@@ -49,6 +49,11 @@ The site token is server-side only. Browser requests use a short-lived same-orig
 Content-administration calls use the same signed server-to-server control boundary. Media import is limited to public HTTPS image sources and blocks private/reserved destinations, unsupported MIME types and files larger than 10 MB. Published content cannot be modified or trashed through the direct draft-first endpoints.
 
 == Changelog ==
+
+= 1.3.12 =
+* Rename the connector classes to Harika and publish harika-wordpress-connector.zip.
+* Keep attaching ccf-sites-ads-connector.zip and keep the installed plugin path, so existing sites update in place.
+* Prefer harika-wordpress-connector.zip when a release contains both package names.
 
 = 1.3.11 =
 * Publish release tags as harika-wordpress-connector-v<version>.

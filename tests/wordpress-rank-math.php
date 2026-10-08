@@ -41,7 +41,7 @@ class WP_REST_Response {
     public function get_data() { return $this->data; }
 }
 
-class CCF_Sites_Control {
+class Harika_Control {
     public static function authorize($request) { return true; }
 }
 
@@ -98,14 +98,14 @@ function wp_get_ability(string $name) { return $GLOBALS['ccf_abilities'][$name] 
 
 require __DIR__ . '/../wordpress/includes/class-harika-rank-math.php';
 
-$list = CCF_Sites_Rank_Math::list_abilities();
+$list = Harika_Rank_Math::list_abilities();
 if (!$list instanceof WP_REST_Response) throw new RuntimeException('Rank Math ability listing failed.');
 $listData = $list->get_data()['data'] ?? [];
 if (($listData['rank_math_version'] ?? '') !== '1.0.278') throw new RuntimeException('Rank Math version missing.');
 if (($listData['count'] ?? 0) !== 2) throw new RuntimeException('Ability filtering failed.');
 if (($listData['abilities'][0]['name'] ?? '') !== 'rank-math/get-post-seo-meta') throw new RuntimeException('Ability sorting failed.');
 
-$read = CCF_Sites_Rank_Math::execute(new Test_Request([
+$read = Harika_Rank_Math::execute(new Test_Request([
     'ability' => 'rank-math/get-post-seo-meta',
     'mode' => 'readonly',
     'input' => ['post_id' => 42],
@@ -116,7 +116,7 @@ if (($readData['result']['seo_score'] ?? 0) !== 66) throw new RuntimeException('
 if (($readData['result']['user_id'] ?? 0) !== 1) throw new RuntimeException('Rank Math execution did not use the service administrator.');
 if (get_current_user_id() !== 0) throw new RuntimeException('WordPress user context was not restored.');
 
-$blocked = CCF_Sites_Rank_Math::execute(new Test_Request([
+$blocked = Harika_Rank_Math::execute(new Test_Request([
     'ability' => 'rank-math/set-homepage-seo',
     'mode' => 'readonly',
     'input' => ['title' => 'Example'],
@@ -131,12 +131,12 @@ $writeBody = [
     'input' => ['title' => 'Example'],
     'idempotency_key' => 'rank-math-write-test-0001',
 ];
-$write = CCF_Sites_Rank_Math::execute(new Test_Request($writeBody));
+$write = Harika_Rank_Math::execute(new Test_Request($writeBody));
 if (!$write instanceof WP_REST_Response) throw new RuntimeException('Rank Math write execution failed.');
 $writeData = $write->get_data()['data'] ?? [];
 if (($writeData['replayed'] ?? true) !== false) throw new RuntimeException('First write was incorrectly marked as replayed.');
 
-$replay = CCF_Sites_Rank_Math::execute(new Test_Request($writeBody));
+$replay = Harika_Rank_Math::execute(new Test_Request($writeBody));
 if (!$replay instanceof WP_REST_Response) throw new RuntimeException('Rank Math write replay failed.');
 $replayData = $replay->get_data()['data'] ?? [];
 if (($replayData['replayed'] ?? false) !== true) throw new RuntimeException('Rank Math idempotency replay was not detected.');
@@ -144,7 +144,7 @@ if (($replayData['result']['calls'] ?? 0) !== 1) throw new RuntimeException('Ran
 
 $conflictBody = $writeBody;
 $conflictBody['input'] = ['title' => 'Different'];
-$conflict = CCF_Sites_Rank_Math::execute(new Test_Request($conflictBody));
+$conflict = Harika_Rank_Math::execute(new Test_Request($conflictBody));
 if (!$conflict instanceof WP_Error || $conflict->code !== 'ccf_rank_math_idempotency_conflict') {
     throw new RuntimeException('Rank Math idempotency conflict was not blocked.');
 }
