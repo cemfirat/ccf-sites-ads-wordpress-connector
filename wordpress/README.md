@@ -32,7 +32,7 @@ Activate **Harika Connector** in WordPress.
 ## Updates
 
 The plugin checks the official GitHub Releases feed for a newer stable
-`harika-wordpress-connector-v*` release. Older `wordpress-v*` tags remain valid. It prefers `harika-wordpress-connector.zip` and still accepts `ccf-sites-ads-connector.zip`.
+`harika-wordpress-connector-v*` release. Older `wordpress-v*` tags remain valid. It prefers `harika-wordpress-connector-v<version>.zip` and still accepts `harika-wordpress-connector.zip` and `ccf-sites-ads-connector.zip`.
 The package then appears as a normal update in the WordPress Plugins screen. Drafts,
 pre-releases, non-semantic tags, foreign download hosts and unexpected asset
 names are rejected. No GitHub credential is stored in WordPress.

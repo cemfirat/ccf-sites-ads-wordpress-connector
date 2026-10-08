@@ -135,7 +135,7 @@ final class Harika_Connector {
             $packages[$name] = $candidate;
         }
         $package = '';
-        foreach ([self::RELEASE_ASSET, self::LEGACY_RELEASE_ASSET] as $name) {
+        foreach (['harika-wordpress-connector-v' . $version . '.zip', self::RELEASE_ASSET, self::LEGACY_RELEASE_ASSET] as $name) {
             if (!isset($packages[$name]) || substr($packages[$name], -strlen('/' . $name)) !== '/' . $name) {
                 continue;
             }

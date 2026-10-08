@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Harika Connector
  * Description: Secure WordPress control, content administration and conversion connector for Harika.
- * Version: 1.3.12
+ * Version: 1.3.13
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Cem Firat
@@ -12,7 +12,7 @@
 
 defined('ABSPATH') || exit;
 
-define('HARIKA_CONNECTOR_VERSION', '1.3.12');
+define('HARIKA_CONNECTOR_VERSION', '1.3.13');
 define('HARIKA_CONNECTOR_FILE', __FILE__);
 define('CCF_SITES_ADS_PLUGIN_VERSION', HARIKA_CONNECTOR_VERSION);
 define('CCF_SITES_ADS_PLUGIN_FILE', HARIKA_CONNECTOR_FILE);
@@ -40,7 +40,7 @@ final class Harika_Connector_Updater {
     private const LEGACY_REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
     private const ASSET = 'harika-wordpress-connector.zip';
     private const LEGACY_ASSET = 'ccf-sites-ads-connector.zip';
-    private const CACHE_KEY = 'harika_connector_github_release_v1';
+    private const CACHE_KEY = 'harika_connector_github_release_v2';
     private const CACHE_TTL = 5 * 60;
 
     public static function init(): void {
@@ -106,8 +106,8 @@ final class Harika_Connector_Updater {
         $tag = isset($payload['tag_name']) ? (string)$payload['tag_name'] : ''; $version = self::version_from_tag($tag);
         if ($version === null) return null;
         $release_url = isset($payload['html_url']) ? esc_url_raw((string)$payload['html_url']) : '';
-        $package = self::package_from_assets(is_array($payload['assets'] ?? null) ? $payload['assets'] : []);
-        $matched = self::matching_repository($release_url, $package);
+        $package = self::package_from_assets(is_array($payload['assets'] ?? null) ? $payload['assets'] : [], $version);
+        $matched = self::matching_repository($release_url, $package, $version);
         if ($matched === null) return null;
         return ['repository'=>$matched,'version'=>$version,'url'=>$release_url,'package'=>$package,'tested'=>'7.1','notes'=>isset($payload['body'])&&is_string($payload['body'])?substr($payload['body'],0,8000):'Aktualisierung des Harika Connectors.'];
     }
@@ -125,7 +125,7 @@ final class Harika_Connector_Updater {
         return $uri === 'https://github.com/' . self::REPOSITORY || $uri === 'https://github.com/' . self::LEGACY_REPOSITORY;
     }
 
-    private static function package_from_assets(array $assets): string {
+    private static function package_from_assets(array $assets, string $version): string {
         $by_name = [];
         foreach ($assets as $asset) {
             if (!is_array($asset)) continue;
@@ -133,20 +133,25 @@ final class Harika_Connector_Updater {
             $candidate = esc_url_raw((string) ($asset['browser_download_url'] ?? ''));
             if ($name !== '' && $candidate !== '') $by_name[$name] = $candidate;
         }
-        foreach ([self::ASSET, self::LEGACY_ASSET] as $name) {
+        foreach (self::asset_names($version) as $name) {
             if (isset($by_name[$name])) return $by_name[$name];
         }
         return '';
     }
 
-    private static function matching_repository(string $release_url, string $package): ?string {
+    private static function matching_repository(string $release_url, string $package, string $version): ?string {
         foreach ([self::REPOSITORY, self::LEGACY_REPOSITORY] as $repository) {
             $prefix = 'https://github.com/' . $repository . '/releases/';
-            foreach ([self::ASSET, self::LEGACY_ASSET] as $asset) {
-                if ($release_url !== '' && strpos($release_url, $prefix) === 0 && strpos($package, $prefix . 'download/') === 0 && substr($package, -strlen('/' . $asset)) === '/' . $asset) return $repository;
+            if ($release_url === '' || strpos($release_url, $prefix) !== 0 || strpos($package, $prefix . 'download/') !== 0) continue;
+            foreach (self::asset_names($version) as $asset) {
+                if (substr($package, -strlen('/' . $asset)) === '/' . $asset) return $repository;
             }
         }
         return null;
+    }
+
+    private static function asset_names(string $version): array {
+        return ['harika-wordpress-connector-v' . $version . '.zip', self::ASSET, self::LEGACY_ASSET];
     }
 }
 
