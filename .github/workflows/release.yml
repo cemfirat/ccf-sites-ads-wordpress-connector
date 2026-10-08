@@ -16,9 +16,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Check browser bridge syntax
-        run: node --check wordpress/assets/ccf-tracking.js
+        run: node --check wordpress/assets/harika-tracking.js
       - name: Check PHP syntax
-        run: php -l wordpress/harika-wordpress-connector.php && php -l wordpress/harika-connector-runtime.inc && php -l wordpress/includes/class-ccf-sites-control.php && php -l wordpress/includes/class-ccf-sites-content-admin.php && php -l wordpress/includes/class-ccf-sites-draft-seo.php && php -l wordpress/includes/class-ccf-sites-status-overlay.php && php -l wordpress/includes/class-ccf-sites-authors.php
+        run: php -l wordpress/harika-wordpress-connector.php && php -l wordpress/harika-connector-runtime.inc && php -l wordpress/includes/class-harika-control.php && php -l wordpress/includes/class-harika-content-admin.php && php -l wordpress/includes/class-harika-draft-seo.php && php -l wordpress/includes/class-harika-status-overlay.php && php -l wordpress/includes/class-harika-authors.php
       - name: Run connector tests
         run: node --test tests/wordpress-bridge.test.mjs && php tests/wordpress-token-crypto.php && php tests/wordpress-control.php && php tests/wordpress-content-admin.php && php tests/wordpress-authors.php && php tests/wordpress-updater.php
       - name: Build and verify ZIP

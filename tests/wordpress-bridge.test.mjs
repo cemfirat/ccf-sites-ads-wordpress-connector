@@ -6,7 +6,7 @@ import vm from 'node:vm';
 test('WordPress bridge synchronizes YOOtheme consent', async () => {
   const listeners = new Map();
   const analyticsCalls = [];
-  const script = await readFile(new URL('../wordpress/assets/ccf-tracking.js', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../wordpress/assets/harika-tracking.js', import.meta.url), 'utf8');
 
   const document = {
     title: 'Example Customer',

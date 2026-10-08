@@ -10,7 +10,7 @@ Build the validated installable ZIP with:
 ```bash
 npm ci
 npm run check
-node --check wordpress/assets/ccf-tracking.js
+node --check wordpress/assets/harika-tracking.js
 php -l wordpress/harika-wordpress-connector.php
 sh scripts/package-wordpress.sh
 ```
