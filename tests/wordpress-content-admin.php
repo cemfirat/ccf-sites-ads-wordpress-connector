@@ -89,7 +89,7 @@ function wp_get_attachment_url($id): string { return ''; }
 function get_post_meta($id, $key, $single = false) { return ''; }
 function wp_get_attachment_metadata($id): array { return []; }
 
-require __DIR__ . '/../wordpress/includes/class-ccf-sites-content-admin.php';
+require __DIR__ . '/../wordpress/includes/class-harika-content-admin.php';
 
 $request = new Test_Request(json_encode([
     'idempotency_key' => 'blog-autumn-2026-001',

@@ -22,15 +22,15 @@ if (function_exists('remove_filter')) {
     remove_filter('plugins_api', [CCF_Google_Ads_Site_Connector::class, 'plugin_information'], 20);
 }
 
-require_once __DIR__ . '/includes/class-ccf-sites-content-admin.php';
+require_once __DIR__ . '/includes/class-harika-content-admin.php';
 CCF_Sites_Content_Admin::init();
-require_once __DIR__ . '/includes/class-ccf-sites-draft-seo.php';
+require_once __DIR__ . '/includes/class-harika-draft-seo.php';
 CCF_Sites_Draft_SEO::init();
-require_once __DIR__ . '/includes/class-ccf-sites-rank-math.php';
+require_once __DIR__ . '/includes/class-harika-rank-math.php';
 CCF_Sites_Rank_Math::init();
-require_once __DIR__ . '/includes/class-ccf-sites-status-overlay.php';
+require_once __DIR__ . '/includes/class-harika-status-overlay.php';
 CCF_Sites_Status_Overlay::init();
-require_once __DIR__ . '/includes/class-ccf-sites-authors.php';
+require_once __DIR__ . '/includes/class-harika-authors.php';
 CCF_Sites_Authors::init();
 
 final class CCF_Sites_Ads_Plugin_Updater {

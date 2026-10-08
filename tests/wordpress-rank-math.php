@@ -96,7 +96,7 @@ $GLOBALS['ccf_abilities'] = [
 function wp_get_abilities(): array { return $GLOBALS['ccf_abilities']; }
 function wp_get_ability(string $name) { return $GLOBALS['ccf_abilities'][$name] ?? null; }
 
-require __DIR__ . '/../wordpress/includes/class-ccf-sites-rank-math.php';
+require __DIR__ . '/../wordpress/includes/class-harika-rank-math.php';
 
 $list = CCF_Sites_Rank_Math::list_abilities();
 if (!$list instanceof WP_REST_Response) throw new RuntimeException('Rank Math ability listing failed.');

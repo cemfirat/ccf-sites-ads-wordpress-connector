@@ -303,7 +303,7 @@ final class CCF_Google_Ads_Site_Connector {
 
         wp_enqueue_script(
             'ccf-google-ads-site-connector',
-            plugins_url('assets/ccf-tracking.js', __FILE__),
+            plugins_url('assets/harika-tracking.js', __FILE__),
             [],
             self::VERSION,
             true
@@ -707,7 +707,7 @@ final class CCF_Google_Ads_Site_Connector {
 
 CCF_Google_Ads_Site_Connector::init();
 
-require_once __DIR__ . '/includes/class-ccf-sites-control.php';
+require_once __DIR__ . '/includes/class-harika-control.php';
 CCF_Sites_Control::init();
 if (function_exists('register_activation_hook')) {
     register_activation_hook(__FILE__, [CCF_Sites_Control::class, 'activate']);

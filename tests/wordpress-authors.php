@@ -58,7 +58,7 @@ final class Test_Request {
     public function get_route(): string { return $this->route; }
 }
 
-require __DIR__ . '/../wordpress/includes/class-ccf-sites-authors.php';
+require __DIR__ . '/../wordpress/includes/class-harika-authors.php';
 CCF_Sites_Authors::init();
 $filters = $GLOBALS['ccf_filters']['rest_post_dispatch'] ?? [];
 if (count($filters) !== 1 || $filters[0][2] !== 3) throw new RuntimeException('Author response augmenter was not registered correctly.');
