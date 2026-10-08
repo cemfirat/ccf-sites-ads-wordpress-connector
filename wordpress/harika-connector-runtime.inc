@@ -10,13 +10,14 @@
 
 defined('ABSPATH') || exit;
 
-final class CCF_Google_Ads_Site_Connector {
+final class Harika_Connector {
     private const VERSION = '1.1.1';
     private const PLUGIN_SLUG = 'ccf-google-ads-site-connector';
     private const GITHUB_REPOSITORY = 'cemfirat/harika-wordpress-connector';
     private const LEGACY_REPOSITORY = 'cemfirat/ccf-sites-ads-wordpress-connector';
-    private const RELEASE_ASSET = 'ccf-sites-ads-connector.zip';
-    private const RELEASE_CACHE_KEY = 'ccf_sites_ads_github_release_v1';
+    private const RELEASE_ASSET = 'harika-wordpress-connector.zip';
+    private const LEGACY_RELEASE_ASSET = 'ccf-sites-ads-connector.zip';
+    private const RELEASE_CACHE_KEY = 'harika_connector_runtime_release_v1';
     private const REST_NAMESPACE = 'ccf-google-ads/v1';
     private const OPTION_NAME = 'ccf_gads_settings';
     private const ENCRYPTION_CONTEXT = 'ccf-google-ads-site-token-v1';
@@ -93,7 +94,7 @@ final class CCF_Google_Ads_Site_Connector {
                 'headers' => [
                     'Accept' => 'application/vnd.github+json',
                     'X-GitHub-Api-Version' => '2022-11-28',
-                    'User-Agent' => 'CCF-Sites-Ads-WordPress-Updater/' . self::VERSION,
+                    'User-Agent' => 'Harika-Connector/' . (defined('HARIKA_CONNECTOR_VERSION') ? HARIKA_CONNECTOR_VERSION : self::VERSION),
                 ],
             ]
         );
@@ -121,16 +122,25 @@ final class CCF_Google_Ads_Site_Connector {
         if ($release_prefix === '') {
             return null;
         }
-        $package = '';
+        $packages = [];
         foreach (($payload['assets'] ?? []) as $asset) {
-            if (!is_array($asset) || ($asset['name'] ?? '') !== self::RELEASE_ASSET) {
+            if (!is_array($asset)) {
                 continue;
             }
+            $name = (string) ($asset['name'] ?? '');
             $candidate = esc_url_raw((string) ($asset['browser_download_url'] ?? ''));
-            if (strpos($candidate, $release_prefix . 'download/') === 0 && substr($candidate, -strlen('/' . self::RELEASE_ASSET)) === '/' . self::RELEASE_ASSET) {
-                $package = $candidate;
-                break;
+            if ($name === '' || $candidate === '' || strpos($candidate, $release_prefix . 'download/') !== 0) {
+                continue;
             }
+            $packages[$name] = $candidate;
+        }
+        $package = '';
+        foreach ([self::RELEASE_ASSET, self::LEGACY_RELEASE_ASSET] as $name) {
+            if (!isset($packages[$name]) || substr($packages[$name], -strlen('/' . $name)) !== '/' . $name) {
+                continue;
+            }
+            $package = $packages[$name];
+            break;
         }
         if ($package === '') {
             return null;
@@ -705,10 +715,10 @@ final class CCF_Google_Ads_Site_Connector {
     }
 }
 
-CCF_Google_Ads_Site_Connector::init();
+Harika_Connector::init();
 
 require_once __DIR__ . '/includes/class-harika-control.php';
-CCF_Sites_Control::init();
+Harika_Control::init();
 if (function_exists('register_activation_hook')) {
-    register_activation_hook(__FILE__, [CCF_Sites_Control::class, 'activate']);
+    register_activation_hook(__FILE__, [Harika_Control::class, 'activate']);
 }

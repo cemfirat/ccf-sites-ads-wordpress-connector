@@ -59,13 +59,13 @@ final class Test_Request {
 }
 
 require __DIR__ . '/../wordpress/includes/class-harika-authors.php';
-CCF_Sites_Authors::init();
+Harika_Authors::init();
 $filters = $GLOBALS['ccf_filters']['rest_post_dispatch'] ?? [];
 if (count($filters) !== 1 || $filters[0][2] !== 3) throw new RuntimeException('Author response augmenter was not registered correctly.');
 $actions = $GLOBALS['ccf_actions']['rest_api_init'] ?? [];
 if (count($actions) !== 1) throw new RuntimeException('Author profile route registration was not registered correctly.');
 
-$authors = CCF_Sites_Authors::eligible_authors();
+$authors = Harika_Authors::eligible_authors();
 if (count($authors) !== 2 || ($authors[0]['display_name'] ?? '') !== 'Cem Cemil Firat' || ($authors[1]['display_name'] ?? '') !== 'developez') throw new RuntimeException('Eligible author discovery or sorting failed.');
 foreach ($authors as $author) {
     $keys = array_keys($author); sort($keys);
@@ -75,18 +75,18 @@ foreach ($authors as $author) {
 }
 
 $inventory = new Test_Response(['data' => ['wordpress' => ['name' => 'Example']]]);
-CCF_Sites_Authors::augment_control_response($inventory, null, new Test_Request('/ccf-sites/v1/inventory'));
+Harika_Authors::augment_control_response($inventory, null, new Test_Request('/ccf-sites/v1/inventory'));
 if (($inventory->get_data()['data']['authors'] ?? null) !== $authors) throw new RuntimeException('Inventory was not augmented with authors.');
 
 $status = new Test_Response(['data' => ['capabilities' => ['wordpress.content.author.write']]]);
-CCF_Sites_Authors::augment_control_response($status, null, new Test_Request('/ccf-sites/v1/status'));
+Harika_Authors::augment_control_response($status, null, new Test_Request('/ccf-sites/v1/status'));
 $statusData = $status->get_data();
 if (!in_array('wordpress.content.author.read', $statusData['data']['capabilities'] ?? [], true)) throw new RuntimeException('Author read capability was not advertised.');
 if (!in_array('wordpress.author.profile.write', $statusData['data']['capabilities'] ?? [], true)) throw new RuntimeException('Author profile write capability was not advertised.');
 if (!in_array('wordpress.author.role.write', $statusData['data']['capabilities'] ?? [], true)) throw new RuntimeException('Author role write capability was not advertised.');
 
 $other = new Test_Response(['data' => ['unchanged' => true]]);
-CCF_Sites_Authors::augment_control_response($other, null, new Test_Request('/ccf-sites/v1/content'));
+Harika_Authors::augment_control_response($other, null, new Test_Request('/ccf-sites/v1/content'));
 if ($other->get_data() !== ['data' => ['unchanged' => true]]) throw new RuntimeException('Unrelated REST responses were modified.');
 
 echo "WordPress safe author discovery passed.\n";
@@ -122,13 +122,13 @@ if (!class_exists('WP_Error')) {
 function is_wp_error($value): bool { return $value instanceof WP_Error; }
 
 $roleRequest = new Test_Role_Request(1, ['role' => 'contributor']);
-$roleResult = CCF_Sites_Authors::update_role($roleRequest);
+$roleResult = Harika_Authors::update_role($roleRequest);
 $roleData = $roleResult instanceof WP_REST_Response ? $roleResult->get_data() : [];
 if (($roleData['data']['changed'] ?? null) !== true) throw new RuntimeException('Safe editorial role change did not report changed=true.');
 if (($roleData['data']['author']['roles'] ?? null) !== ['contributor']) throw new RuntimeException('Safe editorial role change was not verified.');
 
-$privileged = CCF_Sites_Authors::update_role(new Test_Role_Request(4, ['role' => 'author']));
+$privileged = Harika_Authors::update_role(new Test_Role_Request(4, ['role' => 'author']));
 if (!($privileged instanceof WP_Error) || $privileged->code !== 'ccf_author_role_forbidden') throw new RuntimeException('Privileged author role changes were not blocked.');
 
-$invalid = CCF_Sites_Authors::update_role(new Test_Role_Request(1, ['role' => 'editor']));
+$invalid = Harika_Authors::update_role(new Test_Role_Request(1, ['role' => 'editor']));
 if (!($invalid instanceof WP_Error) || $invalid->code !== 'ccf_author_role_invalid') throw new RuntimeException('Non-editorial role changes were not blocked.');

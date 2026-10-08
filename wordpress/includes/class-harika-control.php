@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  * All mutations are previewed, bound to an approval/idempotency key, recorded
  * with before/after snapshots and reversible while the target has not drifted.
  */
-final class CCF_Sites_Control {
+final class Harika_Control {
     private const REST_NAMESPACE = 'ccf-sites/v1';
     private const SIGNATURE_TTL = 300;
     private const NONCE_TTL = 600;
@@ -87,7 +87,7 @@ final class CCF_Sites_Control {
     }
 
     public static function authorize($request) {
-        $token = CCF_Google_Ads_Site_Connector::site_token();
+        $token = Harika_Connector::site_token();
         if (strlen($token) < 32) {
             return new WP_Error('ccf_control_not_configured', 'Control authentication is not configured.', ['status' => 503]);
         }
@@ -137,7 +137,7 @@ final class CCF_Sites_Control {
     public static function status() {
         return self::response([
             'status' => 'ready',
-            'plugin' => ['name' => 'Harika Connector', 'version' => defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.3.0'],
+            'plugin' => ['name' => 'Harika Connector', 'version' => defined('HARIKA_CONNECTOR_VERSION') ? HARIKA_CONNECTOR_VERSION : (defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.3.0')],
             'capabilities' => [
                 'wordpress.inventory.read',
                 'wordpress.content.read',
@@ -783,9 +783,9 @@ final class CCF_Sites_Control {
         return new WP_REST_Response([
             'schema_version' => '1.0',
             'site' => [
-                'client_id' => CCF_Google_Ads_Site_Connector::client_id(),
-                'site_id' => CCF_Google_Ads_Site_Connector::site_id(),
-                'environment' => CCF_Google_Ads_Site_Connector::environment(),
+                'client_id' => Harika_Connector::client_id(),
+                'site_id' => Harika_Connector::site_id(),
+                'environment' => Harika_Connector::environment(),
             ],
             'data' => $data,
         ], $status);

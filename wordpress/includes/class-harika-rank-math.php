@@ -7,9 +7,9 @@ defined('ABSPATH') || exit;
  *
  * Rank Math 1.0.272+ exposes its MCP surface through the WordPress Abilities API.
  * This bridge deliberately discovers those abilities dynamically so future
- * Rank Math abilities become visible to CCF without hard-coding plugin internals.
+ * Rank Math abilities become visible to Harika without hard-coding plugin internals.
  */
-final class CCF_Sites_Rank_Math {
+final class Harika_Rank_Math {
     private const REST_NAMESPACE = 'ccf-sites/v1';
     private const ABILITY_PREFIX = 'rank-math/';
     private const IDEMPOTENCY_TTL = 21600;
@@ -19,7 +19,7 @@ final class CCF_Sites_Rank_Math {
     }
 
     public static function register_routes(): void {
-        $permission = [CCF_Sites_Control::class, 'authorize'];
+        $permission = [Harika_Control::class, 'authorize'];
 
         register_rest_route(self::REST_NAMESPACE, '/rank-math/abilities', [
             'methods' => 'GET',

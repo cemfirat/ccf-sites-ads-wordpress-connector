@@ -2,7 +2,7 @@
 
 defined('ABSPATH') || exit;
 
-final class CCF_Sites_Status_Overlay {
+final class Harika_Status_Overlay {
     public static function init(): void {
         add_action('rest_api_init', [self::class, 'register_route'], 20);
     }
@@ -10,13 +10,13 @@ final class CCF_Sites_Status_Overlay {
     public static function register_route(): void {
         register_rest_route('ccf-sites/v1', '/status', [
             'methods' => 'GET',
-            'permission_callback' => [CCF_Sites_Control::class, 'authorize'],
+            'permission_callback' => [Harika_Control::class, 'authorize'],
             'callback' => [self::class, 'status'],
         ], true);
     }
 
     public static function status() {
-        $response = CCF_Sites_Control::status();
+        $response = Harika_Control::status();
         if (!$response instanceof WP_REST_Response) {
             return $response;
         }
@@ -27,7 +27,7 @@ final class CCF_Sites_Status_Overlay {
         $data = $envelope['data'];
         $data['plugin'] = [
             'name' => 'Harika Connector',
-            'version' => defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.2.0',
+            'version' => defined('HARIKA_CONNECTOR_VERSION') ? HARIKA_CONNECTOR_VERSION : (defined('CCF_SITES_ADS_PLUGIN_VERSION') ? CCF_SITES_ADS_PLUGIN_VERSION : '1.2.0'),
         ];
         $capabilities = isset($data['capabilities']) && is_array($data['capabilities']) ? $data['capabilities'] : [];
         $data['capabilities'] = array_values(array_unique(array_merge($capabilities, [

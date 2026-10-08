@@ -2,7 +2,7 @@
 
 defined('ABSPATH') || exit;
 
-final class CCF_Sites_Draft_SEO {
+final class Harika_Draft_SEO {
     private const REST_NAMESPACE = 'ccf-sites/v1';
     private const SEO_META_KEYS = [
         'rank_math_title',
@@ -21,7 +21,7 @@ final class CCF_Sites_Draft_SEO {
     }
 
     public static function register_routes(): void {
-        $permission = [CCF_Sites_Control::class, 'authorize'];
+        $permission = [Harika_Control::class, 'authorize'];
         register_rest_route(self::REST_NAMESPACE, '/content/(?P<id>\\d+)/seo-draft', [
             'methods' => 'GET',
             'permission_callback' => $permission,

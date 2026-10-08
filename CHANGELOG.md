@@ -2,6 +2,13 @@
 
 All notable changes to the Harika Connector are documented here.
 
+## 1.3.12 - 2026-10-08
+
+- Rename the PHP classes to `Harika_*` and publish `harika-wordpress-connector.zip`.
+- Keep attaching `ccf-sites-ads-connector.zip` and keep the installed plugin directory `ccf-google-ads-site-connector`, so an existing site updates without deactivating.
+- Prefer `harika-wordpress-connector.zip` when both package names are on the release. Connectors that still request the previous filename keep working.
+- Leave `wp-config` constants, REST namespaces, stored options, request headers, and `window.CCFGoogleAds` unchanged. Installed sites and the running control services already use those names.
+
 ## 1.3.11 - 2026-10-07
 
 - Publish releases as `harika-wordpress-connector-v<version>`.

@@ -206,7 +206,7 @@ $timestamp = time();
 $nonce = 'nonce-control-test-12345';
 $body = '';
 $unsigned = new Test_Request('GET', '/ccf-sites/v1/status', $body);
-$payload = CCF_Sites_Control::signature_payload($unsigned, $timestamp, $nonce, $body);
+$payload = Harika_Control::signature_payload($unsigned, $timestamp, $nonce, $body);
 $signature = hash_hmac('sha256', $payload, CCF_GADS_SITE_TOKEN);
 $signed = new Test_Request('GET', '/ccf-sites/v1/status', $body, [
     'x-ccf-timestamp' => (string) $timestamp,
@@ -214,15 +214,15 @@ $signed = new Test_Request('GET', '/ccf-sites/v1/status', $body, [
     'x-ccf-signature' => $signature,
 ]);
 
-if (CCF_Sites_Control::authorize($signed) !== true) {
+if (Harika_Control::authorize($signed) !== true) {
     throw new RuntimeException('Valid signed control request was rejected.');
 }
-$replay = CCF_Sites_Control::authorize($signed);
+$replay = Harika_Control::authorize($signed);
 if (!$replay instanceof WP_Error || $replay->code !== 'ccf_control_replay') {
     throw new RuntimeException('Control nonce replay was not blocked.');
 }
 
-$inventory = CCF_Sites_Control::inventory();
+$inventory = Harika_Control::inventory();
 if (!$inventory instanceof WP_REST_Response || $inventory->status !== 200) {
     throw new RuntimeException('Inventory request failed.');
 }
@@ -247,7 +247,7 @@ $preview_request = new Test_Request(
         'changes' => ['post_title' => 'New title'],
     ], JSON_THROW_ON_ERROR)
 );
-$preview = CCF_Sites_Control::preview($preview_request);
+$preview = Harika_Control::preview($preview_request);
 if (!$preview instanceof WP_REST_Response || $preview->status !== 200) {
     throw new RuntimeException('Post change preview failed.');
 }
@@ -269,7 +269,7 @@ $schedule_request = new Test_Request(
         ],
     ], JSON_THROW_ON_ERROR)
 );
-$schedule_preview = CCF_Sites_Control::preview($schedule_request);
+$schedule_preview = Harika_Control::preview($schedule_request);
 if (!$schedule_preview instanceof WP_REST_Response || $schedule_preview->status !== 200) {
     throw new RuntimeException('Scheduled publishing preview failed.');
 }
@@ -300,7 +300,7 @@ $apply_request = new Test_Request(
         ],
     ], JSON_THROW_ON_ERROR)
 );
-$applied = CCF_Sites_Control::apply($apply_request);
+$applied = Harika_Control::apply($apply_request);
 if (!$applied instanceof WP_REST_Response || $applied->status !== 201) {
     throw new RuntimeException('Scheduled publishing apply failed.');
 }
@@ -317,12 +317,12 @@ $rollback_request = new Test_Request(
     '/ccf-sites/v1/changes/rollback',
     json_encode(['change_id' => $change_id], JSON_THROW_ON_ERROR)
 );
-$rolled_back = CCF_Sites_Control::rollback($rollback_request);
+$rolled_back = Harika_Control::rollback($rollback_request);
 if (!$rolled_back instanceof WP_REST_Response || ($GLOBALS['ccf_post']['post_status'] ?? '') !== 'draft' || ($GLOBALS['ccf_post']['post_author'] ?? 0) !== 7) {
     throw new RuntimeException('Scheduled publishing rollback failed.');
 }
 
-$drift_preview = CCF_Sites_Control::preview($schedule_request);
+$drift_preview = Harika_Control::preview($schedule_request);
 $drift_plan = $drift_preview->data['data']['preview'] ?? null;
 $GLOBALS['ccf_post']['post_title'] = 'Drifted title';
 $drift_apply = new Test_Request(
@@ -337,12 +337,12 @@ $drift_apply = new Test_Request(
         'changes' => ['post_status' => 'future', 'post_date' => '2026-09-21 08:00:00'],
     ], JSON_THROW_ON_ERROR)
 );
-$drift_result = CCF_Sites_Control::apply($drift_apply);
+$drift_result = Harika_Control::apply($drift_apply);
 if (!$drift_result instanceof WP_Error || $drift_result->code !== 'ccf_change_drift') {
     throw new RuntimeException('Drift protection did not block stale scheduled publishing.');
 }
 
-$invalid_author = CCF_Sites_Control::preview(new Test_Request(
+$invalid_author = Harika_Control::preview(new Test_Request(
     'POST',
     '/ccf-sites/v1/changes/preview',
     json_encode(['operation' => 'post.update', 'target' => ['post_id' => 42], 'changes' => ['post_author' => 999]], JSON_THROW_ON_ERROR)
@@ -360,7 +360,7 @@ $seo_request = new Test_Request(
         'changes' => ['rank_math_title' => 'New SEO title'],
     ], JSON_THROW_ON_ERROR)
 );
-$seo = CCF_Sites_Control::preview($seo_request);
+$seo = Harika_Control::preview($seo_request);
 if (($seo->data['data']['preview']['diff']['rank_math_title']['after'] ?? '') !== 'New SEO title') {
     throw new RuntimeException('Rank Math preview failed.');
 }

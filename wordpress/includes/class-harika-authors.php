@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
  * built-in WordPress contributor/author roles and are blocked for privileged
  * users. E-mail, login, password and arbitrary capabilities are never changed.
  */
-final class CCF_Sites_Authors {
+final class Harika_Authors {
     private const READ_CAPABILITY = 'wordpress.content.author.read';
     private const PROFILE_WRITE_CAPABILITY = 'wordpress.author.profile.write';
     private const ROLE_WRITE_CAPABILITY = 'wordpress.author.role.write';
@@ -37,12 +37,12 @@ final class CCF_Sites_Authors {
     public static function register_routes(): void {
         register_rest_route(self::REST_NAMESPACE, '/authors/(?P<id>\\d+)/profile', [
             'methods' => 'POST',
-            'permission_callback' => [CCF_Sites_Control::class, 'authorize'],
+            'permission_callback' => [Harika_Control::class, 'authorize'],
             'callback' => [self::class, 'update_profile'],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/authors/(?P<id>\\d+)/role', [
             'methods' => 'POST',
-            'permission_callback' => [CCF_Sites_Control::class, 'authorize'],
+            'permission_callback' => [Harika_Control::class, 'authorize'],
             'callback' => [self::class, 'update_role'],
         ]);
     }

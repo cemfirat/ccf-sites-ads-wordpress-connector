@@ -4,9 +4,10 @@ set -eu
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 BUILD_DIR="$ROOT_DIR/dist/wordpress-package"
 PLUGIN_DIR="$BUILD_DIR/ccf-google-ads-site-connector"
-ZIP_PATH="$ROOT_DIR/dist/ccf-sites-ads-connector.zip"
+ZIP_PATH="$ROOT_DIR/dist/harika-wordpress-connector.zip"
+LEGACY_ZIP_PATH="$ROOT_DIR/dist/ccf-sites-ads-connector.zip"
 
-rm -rf "$BUILD_DIR" "$ZIP_PATH"
+rm -rf "$BUILD_DIR" "$ZIP_PATH" "$LEGACY_ZIP_PATH"
 mkdir -p "$PLUGIN_DIR/assets" "$PLUGIN_DIR/includes"
 
 cp "$ROOT_DIR/wordpress/harika-wordpress-connector.php" "$PLUGIN_DIR/ccf-google-ads-site-connector.php"
@@ -20,14 +21,21 @@ cd "$BUILD_DIR"
 zip -qr "$ZIP_PATH" ccf-google-ads-site-connector
 unzip -t "$ZIP_PATH"
 
-REQUIRED_PATH="ccf-google-ads-site-connector/includes/class-harika-authors.php"
-if ! unzip -Z1 "$ZIP_PATH" | grep -Fxq "$REQUIRED_PATH"; then
-  echo "Missing required package file: $REQUIRED_PATH" >&2
-  exit 1
-fi
+for REQUIRED_PATH in \
+  ccf-google-ads-site-connector/ccf-google-ads-site-connector.php \
+  ccf-google-ads-site-connector/includes/class-harika-authors.php \
+  ccf-google-ads-site-connector/assets/harika-tracking.js
+do
+  if ! unzip -Z1 "$ZIP_PATH" | grep -Fxq "$REQUIRED_PATH"; then
+    echo "Missing required package file: $REQUIRED_PATH" >&2
+    exit 1
+  fi
+done
 
 for file in "$PLUGIN_DIR"/*.php "$PLUGIN_DIR"/*.inc "$PLUGIN_DIR"/includes/*.php; do
   php -l "$file"
 done
 
+cp "$ZIP_PATH" "$LEGACY_ZIP_PATH"
 echo "$ZIP_PATH"
+echo "$LEGACY_ZIP_PATH"
