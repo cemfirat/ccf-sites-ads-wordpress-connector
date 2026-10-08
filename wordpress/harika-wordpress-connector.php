@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Harika Connector
  * Description: Secure WordPress control, content administration and conversion connector for Harika.
- * Version: 1.3.13
+ * Version: 1.3.14
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Cem Firat
@@ -12,7 +12,7 @@
 
 defined('ABSPATH') || exit;
 
-define('HARIKA_CONNECTOR_VERSION', '1.3.13');
+define('HARIKA_CONNECTOR_VERSION', '1.3.14');
 define('HARIKA_CONNECTOR_FILE', __FILE__);
 define('CCF_SITES_ADS_PLUGIN_VERSION', HARIKA_CONNECTOR_VERSION);
 define('CCF_SITES_ADS_PLUGIN_FILE', HARIKA_CONNECTOR_FILE);
